@@ -10,6 +10,7 @@ import 'moment/min/locales.min';
 import App from './app';
 import './services/sentry';
 import './services/api-interface-with-dashboard';
+import 'react-toggle/style.css'; // for ES6 modules
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

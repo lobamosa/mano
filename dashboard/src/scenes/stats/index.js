@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { Col, Container, Nav, NavItem, NavLink, Row, TabContent, TabPane } from 'reactstrap';
 import XLSX from 'xlsx';
 import moment from 'moment';
+import Toggle from 'react-toggle';
 
 import Header from '../../components/header';
 
@@ -31,6 +32,8 @@ import Filters, { filterData } from '../../components/Filters';
 import ReportsContext from '../../contexts/reports';
 import RefreshContext from '../../contexts/refresh';
 import Card from '../../components/Card';
+import PieChart from '../../assets/icons/PieChart';
+import LineChart from '../../assets/icons/LineChart';
 moment.locale('fr');
 
 const getDataForPeriod = (data, { startDate, endDate }, filters = []) => {
@@ -102,6 +105,7 @@ const Stats = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [filterPersons, setFilterPersons] = useState([]);
+  const [chartType, setChartType] = useState('overall'); // 'overall' / 'evolution'
 
   const [period, setPeriod] = useState({ startDate: null, endDate: null });
 
@@ -146,6 +150,17 @@ const Stats = () => {
             <ButtonCustom color="primary" onClick={onExportToCSV} title="Exporter les données en .xlsx" padding="12px 24px" />
           </Col>
         )}
+        <Col md={8} style={{ display: 'flex', alignItems: 'center' }}>
+          <span style={{ marginRight: '10px' }}>Évolution</span>
+          <div style={{ marginTop: 5 }}>
+            <Toggle
+              defaultChecked={chartType === 'overall'}
+              icons={{ checked: <PieChart />, unchecked: <LineChart /> }}
+              onChange={() => setChartType(chartType === 'overall' ? 'evolution' : 'overall')}
+            />
+          </div>
+          <span style={{ marginLeft: '10px' }}>Global</span>
+        </Col>
       </Row>
       <Nav tabs style={{ marginBottom: 20 }}>
         {['Général', 'Actions', 'Personnes suivies', 'Observations', 'Comptes-rendus'].map((tabCaption, index) => (
