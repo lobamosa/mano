@@ -1,0 +1,19 @@
+version: "3"
+services:
+  mano:
+    container_name: mano
+    env_file: 
+      - .env.local
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - postgres
+  postgres:
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: manoTest
