@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  mano:
+    container_name: mano
+    env_file: 
+      - api/.env
+    build:
+      context: .
+      dockerfile: api/Dockerfile.dev
+    volumes: 
+      - .:/var/www/html
+    ports: 
+       - 3000:3000
+  postgres:
+    env_file: 
+      - api/.env
+    container_name: postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: adminTest
+    ports: 
+      - 5432:5432
+
+
