@@ -44,7 +44,7 @@ const CreateAction = ({ disabled, title, person = null, persons = null, isMulti 
 
   const wrapperProps = buttonOnly ? {} : { className: 'noprint' };
 
-  const catsSelect = [...(organisation.categories || [])].sort((c1, c2) => c1.localeCompare(c2));
+  const catsSelect = [...(organisation.categories || [])];
 
   return (
     <Wrapper {...wrapperProps}>
@@ -83,6 +83,7 @@ const CreateAction = ({ disabled, title, person = null, persons = null, isMulti 
               status: !!completedAt ? DONE : TODO,
               categories: [],
               description: '',
+              urgent: false,
             }}
             onSubmit={async (values, actions) => {
               if (!values.name) return toastr.error('Erreur!', 'Le nom est obligatoire');
@@ -98,6 +99,7 @@ const CreateAction = ({ disabled, title, person = null, persons = null, isMulti 
                 status: values.status,
                 categories: values.categories,
                 description: values.description,
+                urgent: values.urgent,
                 user: user._id,
               };
               if (typeof values.person === 'string') {
@@ -134,13 +136,13 @@ const CreateAction = ({ disabled, title, person = null, persons = null, isMulti 
                 <Row>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Nom de l'action</Label>
+                      <Label htmlFor="create-action-name">Nom de l'action</Label>
                       <Input id="create-action-name" name="name" value={values.name} onChange={handleChange} />
                     </FormGroup>
                   </Col>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Sous l'équipe</Label>
+                      <Label htmlFor="create-action-team-select">Sous l'équipe</Label>
                       <SelectTeam
                         teams={user.role === 'admin' ? teams : user.teams}
                         teamId={values.team}
@@ -155,7 +157,7 @@ const CreateAction = ({ disabled, title, person = null, persons = null, isMulti 
                     </FormGroup>
                   </Col>
                   <Col md={6}>
-                    <Label>Statut</Label>
+                    <Label htmlFor="new-action-select-status">Statut</Label>
                     <SelectStatus
                       name="status"
                       value={values.status || ''}
@@ -166,7 +168,7 @@ const CreateAction = ({ disabled, title, person = null, persons = null, isMulti 
                   </Col>
                   <Col lg={3} md={6}>
                     <FormGroup>
-                      <Label>Échéance</Label>
+                      <Label htmlFor="create-action-dueat">Échéance</Label>
                       <div>
                         <DatePicker
                           locale="fr"
@@ -185,15 +187,16 @@ const CreateAction = ({ disabled, title, person = null, persons = null, isMulti 
                     <FormGroup>
                       <Label />
                       <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 20, width: '80%' }}>
-                        <span>Montrer l'heure</span>
-                        <Input type="checkbox" name="withTime" checked={values.withTime} onChange={handleChange} />
+                        <label htmlFor="withTime">Montrer l'heure</label>
+                        <Input type="checkbox" id="withTime" name="withTime" checked={values.withTime} onChange={handleChange} />
                       </div>
                     </FormGroup>
                   </Col>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Catégories</Label>
+                      <Label htmlFor="categories">Catégories</Label>
                       <SelectCustom
+                        inputId="categories"
                         options={catsSelect}
                         name="categories"
                         onChange={(v) => handleChange({ currentTarget: { value: v, name: 'categories' } })}
@@ -207,8 +210,24 @@ const CreateAction = ({ disabled, title, person = null, persons = null, isMulti 
                   </Col>
                   <Col lg={12} md={6}>
                     <FormGroup>
-                      <Label>Description</Label>
+                      <Label htmlFor="create-action-description">Description</Label>
                       <Input id="create-action-description" type="textarea" name="description" value={values.description} onChange={handleChange} />
+                    </FormGroup>
+                  </Col>
+                  <Col md={12}>
+                    <FormGroup>
+                      <Label htmlFor="create-action-urgent">
+                        <input
+                          type="checkbox"
+                          id="create-action-urgent"
+                          style={{ marginRight: '0.5rem' }}
+                          name="urgent"
+                          checked={values.urgent}
+                          onChange={handleChange}
+                        />
+                        Action prioritaire <br />
+                        <small className="text-muted">Cette action sera mise en avant par rapport aux autres</small>
+                      </Label>
                     </FormGroup>
                   </Col>
                 </Row>

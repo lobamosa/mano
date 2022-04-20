@@ -15,6 +15,7 @@ import { placesState, preparePlaceForEncryption } from '../../recoil/places';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { refreshTriggerState } from '../../components/Loader';
 import useApi from '../../services/api';
+import useTitle from '../../services/useTitle';
 
 const View = () => {
   const { id } = useParams();
@@ -23,9 +24,11 @@ const View = () => {
   const [relsPersonPlace, setRelsPersonPlace] = useRecoilState(relsPersonPlaceState);
   const persons = useRecoilValue(personsState);
   const setRefreshTrigger = useSetRecoilState(refreshTriggerState);
+
   const API = useApi();
 
   const place = places.find((p) => p._id === id);
+  useTitle(`${place?.name} - Lieu fréquenté`);
 
   const deleteData = async () => {
     const confirm = window.confirm('Êtes-vous sûr ?');
@@ -84,13 +87,13 @@ const View = () => {
               <Row>
                 <Col md={6}>
                   <FormGroup>
-                    <Label>Nom</Label>
-                    <Input name="name" value={values.name} onChange={handleChange} />
+                    <Label htmlFor="name">Nom</Label>
+                    <Input name="name" id="name" value={values.name} onChange={handleChange} />
                   </FormGroup>
                 </Col>
                 <Col md={12}>
                   <FormGroup>
-                    <Label>Personnes suivies</Label>
+                    <Label htmlFor="persons">Personnes suivies</Label>
                     <p style={{ marginBottom: 0 }}>
                       {relsPersonPlace
                         .filter((rel) => rel.place === place._id)

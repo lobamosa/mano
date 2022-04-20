@@ -1,3 +1,180 @@
+## [1.94.1](https://github.com/SocialGouv/mano/compare/v1.94.0...v1.94.1) (2022-04-14)
+
+
+### Bug Fixes
+
+* **website:** download height page ([41ef994](https://github.com/SocialGouv/mano/commit/41ef9943166df832b9e0c94628bdffa54e3a9075))
+
+# [1.94.0](https://github.com/SocialGouv/mano/compare/v1.93.0...v1.94.0) (2022-04-14)
+
+
+### Features
+
+* release apk in mano-app website ([#619](https://github.com/SocialGouv/mano/issues/619)) ([88ecef2](https://github.com/SocialGouv/mano/commit/88ecef219a91aeb141d130c29e0bb69706685cc6))
+
+# [1.93.0](https://github.com/SocialGouv/mano/compare/v1.92.0...v1.93.0) (2022-04-14)
+
+
+### Features
+
+* **dashboard:** enable dossier medical ([#616](https://github.com/SocialGouv/mano/issues/616)) ([815e2f4](https://github.com/SocialGouv/mano/commit/815e2f48dabad1483ecb144ce4b665ad29d7e0c1))
+
+# [1.92.0](https://github.com/SocialGouv/mano/compare/v1.91.0...v1.92.0) (2022-04-13)
+
+
+### Features
+
+* **dashboard,app:** new charte and new html chart for dashboard ([#615](https://github.com/SocialGouv/mano/issues/615)) ([ce7e4ab](https://github.com/SocialGouv/mano/commit/ce7e4abc81217147250b17ace39b057d357f4ca1))
+
+# [1.91.0](https://github.com/SocialGouv/mano/compare/v1.90.1...v1.91.0) (2022-04-13)
+
+
+### Features
+
+* **dashboard:** stats for passages ([#614](https://github.com/SocialGouv/mano/issues/614)) ([7bc04ef](https://github.com/SocialGouv/mano/commit/7bc04ef15944a86ca2415eefc13eff01cddf39ed))
+
+## [1.90.1](https://github.com/SocialGouv/mano/compare/v1.90.0...v1.90.1) (2022-04-13)
+
+
+### Bug Fixes
+
+* **dashboard:** bug with useTitle in report ([#612](https://github.com/SocialGouv/mano/issues/612)) ([6594ea2](https://github.com/SocialGouv/mano/commit/6594ea231fb0223eae9968da32cb2ab35737d819))
+* **dashboard:** prevent clear action status on crud ([#613](https://github.com/SocialGouv/mano/issues/613)) ([03e432e](https://github.com/SocialGouv/mano/commit/03e432ee6ed5c538a0c543fbcd899fa2bd8d9f5d))
+
+# [1.90.0](https://github.com/SocialGouv/mano/compare/v1.89.10...v1.90.0) (2022-04-12)
+
+
+### Features
+
+* **dashboard:** can filter by no category ([#607](https://github.com/SocialGouv/mano/issues/607)) ([3b4de4a](https://github.com/SocialGouv/mano/commit/3b4de4ac2ed515efceb2edfcc50109954746d9d0))
+
+## [1.89.10](https://github.com/SocialGouv/mano/compare/v1.89.9...v1.89.10) (2022-04-12)
+
+
+### Bug Fixes
+
+* **dashboard:** accessibility many stuff ([#598](https://github.com/SocialGouv/mano/issues/598)) ([9511da2](https://github.com/SocialGouv/mano/commit/9511da22013f6baace5c65d4c3beb4e7c60b37b5))
+
+## [1.89.9](https://github.com/SocialGouv/mano/compare/v1.89.8...v1.89.9) (2022-04-12)
+
+
+### Bug Fixes
+
+* **dashboard:** new passages ([#606](https://github.com/SocialGouv/mano/issues/606)) ([e76a29c](https://github.com/SocialGouv/mano/commit/e76a29cd210d548fbeea5f8f91c63d5505e7d6b6))
+
+## [1.89.8](https://github.com/SocialGouv/mano/compare/v1.89.7...v1.89.8) (2022-04-12)
+
+
+### Bug Fixes
+
+* **dashboard:** filter add or remove a bit buggy ([#605](https://github.com/SocialGouv/mano/issues/605)) ([aef26ab](https://github.com/SocialGouv/mano/commit/aef26abc9fd1f2622dc1d192d8a5f04b994505ed))
+
+## [1.89.7](https://github.com/SocialGouv/mano/compare/v1.89.6...v1.89.7) (2022-04-12)
+
+
+### Bug Fixes
+
+* stats passages actions ([#604](https://github.com/SocialGouv/mano/issues/604)) ([3af4910](https://github.com/SocialGouv/mano/commit/3af4910800f93f041d4555fe1cb2f421f3442699))
+
+## [1.89.6](https://github.com/SocialGouv/mano/compare/v1.89.5...v1.89.6) (2022-04-12)
+
+
+### Bug Fixes
+
+* **api:** save dashboard version in user for debug ([ea7a27b](https://github.com/SocialGouv/mano/commit/ea7a27b63f638dbb4005e44b7a6dde06c2c65d88))
+
+## [1.89.5](https://github.com/SocialGouv/mano/compare/v1.89.4...v1.89.5) (2022-04-11)
+
+
+### Bug Fixes
+
+* multiple bugs and tiny improvements ([#601](https://github.com/SocialGouv/mano/issues/601)) ([476cdae](https://github.com/SocialGouv/mano/commit/476cdae1847d590df55a040add5e2e18e3661781))
+
+## [1.89.4](https://github.com/SocialGouv/mano/compare/v1.89.3...v1.89.4) (2022-04-11)
+
+
+### Bug Fixes
+
+* debug sentry https://sentry.io/share/issue/da76d06d6f664ce59a163a3a8f9d97de/ ([5a7c714](https://github.com/SocialGouv/mano/commit/5a7c7144a707f611651ae7df343dcbef63c56540))
+
+## [1.89.3](https://github.com/SocialGouv/mano/compare/v1.89.2...v1.89.3) (2022-04-11)
+
+
+### Bug Fixes
+
+* update team in dashboard ([878d8fe](https://github.com/SocialGouv/mano/commit/878d8fe3ff0251ad844c46ba31d31ec6e083b501))
+
+## [1.89.2](https://github.com/SocialGouv/mano/compare/v1.89.1...v1.89.2) (2022-04-08)
+
+
+### Bug Fixes
+
+* **dashboard:** aria label on incrementor ([#596](https://github.com/SocialGouv/mano/issues/596)) ([69ce18b](https://github.com/SocialGouv/mano/commit/69ce18bf6ba190e273e46ffeb7cd5f70c79bded5))
+* **dashboard:** label with htmlFor with new sonarlint config ([#597](https://github.com/SocialGouv/mano/issues/597)) ([e32a8e8](https://github.com/SocialGouv/mano/commit/e32a8e8f50cabb08d1d1eafba7dfb48ce5af124a))
+
+## [1.89.1](https://github.com/SocialGouv/mano/compare/v1.89.0...v1.89.1) (2022-04-08)
+
+
+### Bug Fixes
+
+* **dashboard:** table custom field mutations ([#594](https://github.com/SocialGouv/mano/issues/594)) ([3d14a36](https://github.com/SocialGouv/mano/commit/3d14a362325612fcaef6597fe181496a8bad6a36))
+* send only public data in public route ([#590](https://github.com/SocialGouv/mano/issues/590)) ([9900a60](https://github.com/SocialGouv/mano/commit/9900a60231cc443bc073631f2296e55035c73d85))
+
+# [1.89.0](https://github.com/SocialGouv/mano/compare/v1.88.0...v1.89.0) (2022-04-08)
+
+
+### Features
+
+* new app version ([3252eef](https://github.com/SocialGouv/mano/commit/3252eef19e9842a82ffa23aaab3c6672836c4982))
+
+# [1.88.0](https://github.com/SocialGouv/mano/compare/v1.87.2...v1.88.0) (2022-04-08)
+
+
+### Features
+
+* **dashboard:** filter by category and status on person ([#586](https://github.com/SocialGouv/mano/issues/586)) ([470e6b6](https://github.com/SocialGouv/mano/commit/470e6b6be23541b36a8406948bfa0aa19a104d2c))
+
+## [1.87.2](https://github.com/SocialGouv/mano/compare/v1.87.1...v1.87.2) (2022-04-08)
+
+
+### Bug Fixes
+
+* **app:** can update an obs that does not belong to me ([#592](https://github.com/SocialGouv/mano/issues/592)) ([f8030e2](https://github.com/SocialGouv/mano/commit/f8030e2ee3ec6b58161af7a0080f3e037b3455b0))
+
+## [1.87.1](https://github.com/SocialGouv/mano/compare/v1.87.0...v1.87.1) (2022-04-08)
+
+
+### Bug Fixes
+
+* api Op not defined ([5e42c85](https://github.com/SocialGouv/mano/commit/5e42c854122a961b2c4e39ea6e039ae51591fb13))
+
+# [1.87.0](https://github.com/SocialGouv/mano/compare/v1.86.0...v1.87.0) (2022-04-08)
+
+
+### Bug Fixes
+
+* **security:** separate public and private routes ([#576](https://github.com/SocialGouv/mano/issues/576)) ([ea25259](https://github.com/SocialGouv/mano/commit/ea25259997eff28944eea65e0e1105cda6e3c2e2))
+
+
+### Features
+
+* **app, dashboard:** action urgent ([#581](https://github.com/SocialGouv/mano/issues/581)) ([be93ee8](https://github.com/SocialGouv/mano/commit/be93ee8aa6d6317c352fea02b1dfbefff2c20428))
+
+# [1.86.0](https://github.com/SocialGouv/mano/compare/v1.85.9...v1.86.0) (2022-04-08)
+
+
+### Features
+
+* **dashboard:** display birthdate on reception ([#584](https://github.com/SocialGouv/mano/issues/584)) ([e03960c](https://github.com/SocialGouv/mano/commit/e03960cc7489d4a34bda9f2262955fc2a0658f80))
+
+## [1.85.9](https://github.com/SocialGouv/mano/compare/v1.85.8...v1.85.9) (2022-04-08)
+
+
+### Bug Fixes
+
+* **app:** display person name when create action for multiple users (use decrypted data) ([#582](https://github.com/SocialGouv/mano/issues/582)) ([529b5cd](https://github.com/SocialGouv/mano/commit/529b5cd08a426037ebe4adc96ede848612f031ee))
+* **security:** empty key on mobile ([#583](https://github.com/SocialGouv/mano/issues/583)) ([9f68b7a](https://github.com/SocialGouv/mano/commit/9f68b7ac106ee8b9545ff0ab7f1c134d13ffc8a7))
+
 ## [1.85.8](https://github.com/SocialGouv/mano/compare/v1.85.7...v1.85.8) (2022-04-05)
 
 

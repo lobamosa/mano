@@ -22,26 +22,40 @@ import {
 } from '../../recoil/persons';
 import { defaultCustomFields } from '../../recoil/territoryObservations';
 import TableCustomFields from '../../components/TableCustomFields';
-import { organisationState, userState } from '../../recoil/auth';
+import { organisationState } from '../../recoil/auth';
 import useApi, { encryptItem, hashedOrgEncryptionKey } from '../../services/api';
 import ExportData from '../data-import-export/ExportData';
 import ImportData from '../data-import-export/ImportData';
 import DownloadExample from '../data-import-export/DownloadExample';
-import { ENV, theme } from '../../config';
+import { theme } from '../../config';
 import SortableGrid from '../../components/SortableGrid';
 import { prepareReportForEncryption, reportsState } from '../../recoil/reports';
 import { refreshTriggerState } from '../../components/Loader';
+import useTitle from '../../services/useTitle';
+
+const getSettingTitle = (tabId) => {
+  if (tabId === 'infos') return 'Infos';
+  if (tabId === 'encryption') return 'Chiffrement';
+  if (tabId === 'reception') return 'Accueil';
+  if (tabId === 'persons') return 'Personnes';
+  if (tabId === 'consultations') return 'Consultations';
+  if (tabId === 'actions') return 'Actions';
+  if (tabId === 'territories') return 'Territoires';
+  if (tabId === 'export') return 'Export';
+  if (tabId === 'import') return 'Import';
+  return '';
+};
 
 const View = () => {
   const [organisation, setOrganisation] = useRecoilState(organisationState);
   const actions = useRecoilValue(actionsState);
   const reports = useRecoilValue(reportsState);
-  const user = useRecoilValue(userState);
   const setRefreshTrigger = useSetRecoilState(refreshTriggerState);
   const personFieldsIncludingCustomFields = useRecoilValue(personFieldsIncludingCustomFieldsSelector);
   const API = useApi();
   const [tab, setTab] = useState(!organisation.encryptionEnabled ? 'encryption' : 'infos');
   const scrollContainer = useRef(null);
+  useTitle(`Organisation - ${getSettingTitle(tab)}`);
 
   useEffect(() => {
     scrollContainer.current.scrollTo({ top: 0 });
@@ -51,7 +65,7 @@ const View = () => {
     <div style={{ display: 'flex', flexDirection: 'column', margin: '0 -4rem -3rem', height: 'calc(100% + 3rem)' }}>
       <Title>Réglages de l'organisation {organisation.name}</Title>
       <div style={{ display: 'flex', overflow: 'hidden', flex: 1 }}>
-        <Drawer>
+        <Drawer title="Navigation dans les réglages de l'organisation">
           <DrawerButton className={tab === 'infos' ? 'active' : ''} onClick={() => setTab('infos')}>
             Infos
           </DrawerButton>
@@ -65,12 +79,9 @@ const View = () => {
           <DrawerButton className={tab === 'persons' ? 'active' : ''} onClick={() => setTab('persons')} disabled={!organisation.encryptionEnabled}>
             Personnes suivies
           </DrawerButton>
-          {ENV === 'development' || user._id === '09ec2a60-8471-4f4a-ad62-74b2424df28b' ? (
-            <DrawerButton className={tab === 'consultations' ? 'active' : ''} onClick={() => setTab('consultations')}>
-              {' '}
-              Consultations
-            </DrawerButton>
-          ) : null}
+          <DrawerButton className={tab === 'consultations' ? 'active' : ''} onClick={() => setTab('consultations')}>
+            Consultations
+          </DrawerButton>
 
           <DrawerButton className={tab === 'actions' ? 'active' : ''} onClick={() => setTab('actions')}>
             Actions
@@ -115,8 +126,8 @@ const View = () => {
                         <Row>
                           <Col md={6}>
                             <FormGroup>
-                              <Label>Nom</Label>
-                              <Input name="name" value={values.name} onChange={handleChange} />
+                              <Label htmlFor="name">Nom</Label>
+                              <Input name="name" id="name" value={values.name} onChange={handleChange} />
                             </FormGroup>
                           </Col>
                         </Row>
@@ -146,7 +157,7 @@ const View = () => {
                         <Row>
                           <Col md={12}>
                             <FormGroup>
-                              <Label>Categories des actions</Label>
+                              <Label htmlFor="categories">Categories des actions</Label>
                               <SortableGrid
                                 list={values.categories || []}
                                 editItemTitle="Changer le nom de la catégorie d'action"
@@ -195,7 +206,7 @@ const View = () => {
                               />
                             </FormGroup>
                             <FormGroup>
-                              <Label>Ajouter une catégorie</Label>
+                              <Label htmlFor="organisation-select-categories">Ajouter une catégorie</Label>
                               <SelectCustom
                                 key={JSON.stringify(values.categories || [])}
                                 creatable
@@ -239,14 +250,20 @@ const View = () => {
                             <FormGroup>
                               <Label />
                               <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 20, width: '80%' }}>
-                                <span>Accueil de jour activé</span>
-                                <Input type="checkbox" name="receptionEnabled" checked={values.receptionEnabled || false} onChange={handleChange} />
+                                <label htmlFor="receptionEnabled">Accueil de jour activé</label>
+                                <Input
+                                  type="checkbox"
+                                  name="receptionEnabled"
+                                  id="receptionEnabled"
+                                  checked={values.receptionEnabled || false}
+                                  onChange={handleChange}
+                                />
                               </div>
                             </FormGroup>
                           </Col>
                           <Col md={12}>
                             <FormGroup>
-                              <Label>Services disponibles</Label>
+                              <Label htmlFor="services">Services disponibles</Label>
                               <SortableGrid
                                 list={values.services || []}
                                 editItemTitle="Changer le nom du service"
@@ -317,7 +334,7 @@ const View = () => {
                               />
                             </FormGroup>
                             <FormGroup>
-                              <Label>Ajouter un service</Label>
+                              <Label htmlFor="organisation-select-services">Ajouter un service</Label>
                               <SelectCustom
                                 key={JSON.stringify(values.services)}
                                 creatable
@@ -527,7 +544,7 @@ function Consultations({ handleChange, isSubmitting, handleSubmit }) {
       <SubTitleLevel2>Configuration du type de consultation</SubTitleLevel2>
 
       <FormGroup>
-        <Label>Types de consultations</Label>
+        <Label htmlFor="consultations">Types de consultations</Label>
 
         <SortableGrid
           list={consultationsSortable}
@@ -586,10 +603,11 @@ function Consultations({ handleChange, isSubmitting, handleSubmit }) {
         />
       </FormGroup>
       <FormGroup>
-        <Label>Ajouter un type de consultation</Label>
+        <Label htmlFor="select-consultations">Ajouter un type de consultation</Label>
         <SelectCustom
           key={JSON.stringify(consultationsSortable || [])}
           creatable
+          inputId="select-consultations"
           options={consultationTypes
             .filter((cat) => !consultationsSortable.includes(cat))
             .sort((c1, c2) => c1.localeCompare(c2))
@@ -705,7 +723,7 @@ const SubTitleLevel2 = styled.h4`
   margin: 2rem 0;
 `;
 
-const Drawer = styled.aside`
+const Drawer = styled.nav`
   padding-top: 20px;
   padding-left: 10px;
   width: 200px;

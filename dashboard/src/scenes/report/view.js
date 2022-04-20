@@ -45,6 +45,8 @@ import { refreshTriggerState } from '../../components/Loader';
 import useApi from '../../services/api';
 import { passagesState } from '../../recoil/passages';
 import Passage from '../../components/Passage';
+import ExclamationMarkButton from '../../components/ExclamationMarkButton';
+import useTitle from '../../services/useTitle';
 
 const tabs = ['Accueil', 'Actions complétées', 'Actions créées', 'Actions annulées', 'Commentaires', 'Passages', 'Observations'];
 
@@ -73,6 +75,7 @@ const View = () => {
   const reportIndex = currentTeamReports.findIndex((r) => r._id === id);
 
   const report = currentTeamReports[reportIndex];
+  useTitle(report?.date ? `${dayjs(report.date).format('DD-MM-YYYY')} - Compte rendu` : 'Compte rendu');
 
   const onFirstBeforeReport = () => {
     if (reportIndex === currentTeamReports.length - 1) return;
@@ -330,10 +333,18 @@ const ActionCompletedAt = ({ date, status, onUpdateResults = () => null }) => {
             date
           )}`}
           noData={`Pas d'action ${status === CANCEL ? 'annulée' : 'faite'} ce jour`}
-          data={data}
+          data={data.map((a) => (a.urgent ? { ...a, style: { backgroundColor: '#fecaca' } } : a))}
           onRowClick={(action) => history.push(`/action/${action._id}`)}
           rowKey="_id"
           columns={[
+            {
+              title: '',
+              dataKey: 'urgent',
+              small: true,
+              render: (action) => {
+                return action.urgent ? <ExclamationMarkButton /> : null;
+              },
+            },
             { title: 'À faire le ', dataKey: 'dueAt', render: (action) => <DateBloc date={action.dueAt} /> },
             {
               title: 'Heure',
@@ -350,7 +361,7 @@ const ActionCompletedAt = ({ date, status, onUpdateResults = () => null }) => {
               render: (action) => <PersonName item={action} />,
             },
             { title: 'Créée le', dataKey: 'createdAt', render: (action) => formatDateWithFullMonth(action.createdAt || '') },
-            { title: 'Status', dataKey: 'status', render: (action) => <ActionStatus status={action.status} /> },
+            { title: 'Statut', dataKey: 'status', render: (action) => <ActionStatus status={action.status} /> },
           ]}
         />
       </StyledBox>
@@ -389,10 +400,18 @@ const ActionCreatedAt = ({ date, onUpdateResults = () => null }) => {
           className="Table"
           title={`Action${moreThanOne ? 's' : ''} créée${moreThanOne ? 's' : ''} le ${formatDateWithFullMonth(date)}`}
           noData="Pas d'action créée ce jour"
-          data={data}
+          data={data.map((a) => (a.urgent ? { ...a, style: { backgroundColor: '#fecaca' } } : a))}
           onRowClick={(action) => history.push(`/action/${action._id}`)}
           rowKey="_id"
           columns={[
+            {
+              title: '',
+              dataKey: 'urgent',
+              small: true,
+              render: (action) => {
+                return action.urgent ? <ExclamationMarkButton /> : null;
+              },
+            },
             { title: 'À faire le ', dataKey: 'dueAt', render: (d) => <DateBloc date={d.dueAt} /> },
             {
               title: 'Heure',
@@ -409,7 +428,7 @@ const ActionCreatedAt = ({ date, onUpdateResults = () => null }) => {
               render: (action) => <PersonName item={action} />,
             },
             { title: 'Créée le', dataKey: 'createdAt', render: (action) => formatDateWithFullMonth(action.createdAt) },
-            { title: 'Status', dataKey: 'status', render: (action) => <ActionStatus status={action.status} /> },
+            { title: 'Statut', dataKey: 'status', render: (action) => <ActionStatus status={action.status} /> },
           ]}
         />
       </StyledBox>
@@ -743,7 +762,7 @@ const DescriptionAndCollaborations = ({ report }) => {
                       alignItems: report?.description?.length ? 'center' : 'flex-start',
                       justifyContent: 'flex-start',
                     }}>
-                    <Label>Description</Label>
+                    <Label htmlFor="description">Description</Label>
                     <ReportDescriptionModale report={report} />
                   </div>
                   <p>
@@ -759,7 +778,7 @@ const DescriptionAndCollaborations = ({ report }) => {
               <Col md={2} />
               <Col md={5}>
                 <FormGroup>
-                  <Label>Collaboration</Label>
+                  <Label htmlFor="report-select-collaboration">Collaboration</Label>
                   <SelectAndCreateCollaboration values={values.collaborations} onChange={handleChange} />
                 </FormGroup>
               </Col>

@@ -15,10 +15,12 @@ import useApi from '../../services/api';
 import { AppSentry } from '../../services/sentry';
 import OnboardingEndModal from '../../components/OnboardingEndModal';
 import { formatDateWithFullMonth } from '../../services/date';
+import useTitle from '../../services/useTitle';
 
 const List = () => {
   const teams = useRecoilValue(teamsState);
   const history = useHistory();
+  useTitle('Équipes');
 
   return (
     <>
@@ -107,13 +109,13 @@ const Create = () => {
                   <Row>
                     <Col md={6}>
                       <FormGroup>
-                        <Label>Nom</Label>
-                        <Input name="name" value={values.name} onChange={handleChange} />
+                        <Label htmlFor="name">Nom</Label>
+                        <Input name="name" id="name" value={values.name} onChange={handleChange} />
                       </FormGroup>
                     </Col>
                     <Col md={6}>
                       <FormGroup>
-                        <Label>L'équipe travaille-t-elle de nuit ?</Label>
+                        <Label htmlFor="">L'équipe travaille-t-elle de nuit ?</Label>
                         <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 20, width: '80%' }}>
                           <FormGroup style={{ marginBottom: 0 }}>
                             <input

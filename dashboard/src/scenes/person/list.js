@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Col, Row } from 'reactstrap';
 import { useHistory } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
@@ -11,7 +11,6 @@ import Table from '../../components/table';
 import CreatePerson from './CreatePerson';
 import { customFieldsPersonsMedicalSelector, customFieldsPersonsSocialSelector, filterPersonsBase } from '../../recoil/persons';
 import TagTeam from '../../components/TagTeam';
-import PaginationContext from '../../contexts/pagination';
 import Filters, { filterData } from '../../components/Filters';
 import { formatBirthDate, formatDateWithFullMonth } from '../../services/date';
 import { personsWithPlacesSelector } from '../../recoil/selectors';
@@ -21,15 +20,21 @@ import { placesState } from '../../recoil/places';
 import { actionsState } from '../../recoil/actions';
 import { commentsState } from '../../recoil/comments';
 import { filterBySearch } from '../search/utils';
+import useTitle from '../../services/useTitle';
+import useSearchParamState from '../../services/useSearchParamState';
 
 const List = () => {
-  const [filters, setFilters] = useState([]);
+  useTitle('Personnes');
   const places = useRecoilValue(placesState);
   const actions = useRecoilValue(actionsState);
   const comments = useRecoilValue(commentsState);
-  const [viewAllOrganisationData, setViewAllOrganisationData] = useState(true);
-  const { search, setSearch, page, setPage, filterTeams, alertness, setFilterAlertness, setFilterTeams } = useContext(PaginationContext);
-
+  const [search, setSearch] = useSearchParamState('search', '');
+  const [alertness, setFilterAlertness] = useSearchParamState('alertness', false);
+  const [viewAllOrganisationData, setViewAllOrganisationData] = useSearchParamState('viewAllOrganisationData', []);
+  const [filterTeams, setFilterTeams] = useSearchParamState('filterTeams', []);
+  const [filters, setFilters] = useSearchParamState('filters', []);
+  const [page, setPage] = useSearchParamState('page', 0);
+  const currentTeam = useRecoilValue(currentTeamState);
   const persons = useRecoilValue(personsWithPlacesSelector);
   const personsFiltered = useMemo(() => {
     let pFiltered = persons;
@@ -93,11 +98,12 @@ const List = () => {
   const customFieldsPersonsSocial = useRecoilValue(customFieldsPersonsSocialSelector);
   const customFieldsPersonsMedical = useRecoilValue(customFieldsPersonsMedicalSelector);
   const organisation = useRecoilValue(organisationState);
-  const currentTeam = useRecoilValue(currentTeamState);
   const history = useHistory();
 
   useEffect(() => {
-    setFilterTeams(viewAllOrganisationData ? [] : [teams.find((team) => team._id === currentTeam._id)._id]);
+    // its not possible to update two different URLSearchParams very quickly, the second one cancels the first one
+    setPage(0); // internal state
+    setFilterTeams(viewAllOrganisationData ? [] : [teams.find((team) => team._id === currentTeam._id)._id], { sideEffect: ['page', 0] });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewAllOrganisationData, currentTeam, teams]);
 
@@ -147,7 +153,9 @@ const List = () => {
       </Row>
       <Row style={{ marginBottom: 20 }}>
         <Col md={12} style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-          <span style={{ marginRight: 20, width: 250, flexShrink: 0 }}>Recherche : </span>
+          <label htmlFor="search" style={{ marginRight: 20, width: 250, flexShrink: 0 }}>
+            Recherche :{' '}
+          </label>
           <Search
             placeholder="Par mot clé, présent dans le nom, la description, un commentaire, une action, ..."
             value={search}
@@ -155,24 +163,33 @@ const List = () => {
           />
         </Col>
         <Col md={12} style={{ display: 'flex', alignItems: 'center' }}>
-          <label style={{ marginLeft: '270px' }}>
+          <label htmlFor="viewAllOrganisationData" style={{ marginLeft: '270px' }}>
             <input
               type="checkbox"
+              id="viewAllOrganisationData"
               style={{ marginRight: 10 }}
               checked={viewAllOrganisationData}
+              value={viewAllOrganisationData}
               onChange={() => setViewAllOrganisationData(!viewAllOrganisationData)}
             />
             Afficher les personnes de toute l'organisation
           </label>
         </Col>
         <Col md={12} style={{ display: 'flex', alignItems: 'center' }}>
-          <label style={{ marginLeft: '270px' }}>
-            <input type="checkbox" style={{ marginRight: 10 }} value={alertness} onChange={() => setFilterAlertness(!alertness)} />
+          <label htmlFor="alertness" style={{ marginLeft: '270px' }}>
+            <input
+              type="checkbox"
+              style={{ marginRight: 10 }}
+              id="alertness"
+              checked={alertness}
+              value={alertness}
+              onChange={() => setFilterAlertness(!alertness)}
+            />
             N'afficher que les personnes vulnérables où ayant besoin d'une attention particulière
           </label>
         </Col>
       </Row>
-      <Filters base={filterPersonsWithAllFields} filters={filters} onChange={setFilters} title="Autres filtres : " />
+      <Filters base={filterPersonsWithAllFields} filters={filters} onChange={setFilters} title="Autres filtres : " saveInURLParams />
       <Table
         data={data}
         rowKey={'_id'}

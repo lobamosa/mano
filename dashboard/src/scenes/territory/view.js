@@ -18,6 +18,7 @@ import { useRecoilState, useSetRecoilState } from 'recoil';
 import { refreshTriggerState } from '../../components/Loader';
 import useApi from '../../services/api';
 import { territoryObservationsState } from '../../recoil/territoryObservations';
+import useTitle from '../../services/useTitle';
 
 const View = () => {
   const { id } = useParams();
@@ -27,6 +28,8 @@ const View = () => {
   const territory = territories.find((t) => t._id === id);
   const setRefreshTrigger = useSetRecoilState(refreshTriggerState);
   const API = useApi();
+
+  useTitle(`${territory?.name} - Territoire`);
 
   const deleteData = async () => {
     const confirm = window.confirm('Êtes-vous sûr ?');
@@ -83,14 +86,14 @@ const View = () => {
                 <Row>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Nom</Label>
-                      <Input name="name" value={values.name} onChange={handleChange} />
+                      <Label htmlFor="name">Nom</Label>
+                      <Input name="name" id="name" value={values.name} onChange={handleChange} />
                     </FormGroup>
                   </Col>
 
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Types</Label>
+                      <Label htmlFor="territory-select-types">Types</Label>
                       <SelectCustom
                         options={territoryTypes}
                         name="types"
@@ -109,8 +112,8 @@ const View = () => {
 
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Périmètre</Label>
-                      <Input name="perimeter" value={values.perimeter} onChange={handleChange} />
+                      <Label htmlFor="perimeter">Périmètre</Label>
+                      <Input name="perimeter" id="perimeter" value={values.perimeter} onChange={handleChange} />
                     </FormGroup>
                   </Col>
                 </Row>

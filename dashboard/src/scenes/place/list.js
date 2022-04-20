@@ -1,5 +1,5 @@
-import React, { Fragment, useContext, useState } from 'react';
-import { Col, FormGroup, Input, Modal, ModalBody, ModalHeader, Row, Button as LinkButton } from 'reactstrap';
+import React, { Fragment, useState } from 'react';
+import { Col, FormGroup, Input, Modal, ModalBody, ModalHeader, Row, Button as LinkButton, Label } from 'reactstrap';
 import { useHistory } from 'react-router-dom';
 import { Formik } from 'formik';
 import { toastr } from 'react-redux-toastr';
@@ -9,7 +9,6 @@ import Loading from '../../components/loading';
 import CreateWrapper from '../../components/createWrapper';
 import Table from '../../components/table';
 import Search from '../../components/search';
-import PaginationContext from '../../contexts/pagination';
 import Page from '../../components/pagination';
 import { filterBySearch } from '../search/utils';
 import { currentTeamState, organisationState } from '../../recoil/auth';
@@ -20,6 +19,8 @@ import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { formatDateWithFullMonth } from '../../services/date';
 import { loadingState, refreshTriggerState } from '../../components/Loader';
 import useApi from '../../services/api';
+import useTitle from '../../services/useTitle';
+import useSearchParamState from '../../services/useSearchParamState';
 
 const filterPlaces = (places, { page, limit, search }) => {
   if (search?.length) places = filterBySearch(search, places);
@@ -29,13 +30,17 @@ const filterPlaces = (places, { page, limit, search }) => {
 };
 
 const List = () => {
+  useTitle('Lieux fréquentés');
+
+  const history = useHistory();
+
   const places = useRecoilValue(placesState);
   const relsPersonPlace = useRecoilValue(relsPersonPlaceState);
   const organisation = useRecoilValue(organisationState);
   const persons = useRecoilValue(personsState);
-  const history = useHistory();
 
-  const { search, setSearch, page, setPage } = useContext(PaginationContext);
+  const [page, setPage] = useSearchParamState('page', 0);
+  const [search, setSearch] = useSearchParamState('search', '');
 
   const limit = 20;
 
@@ -60,7 +65,9 @@ const List = () => {
       </Row>
       <Row style={{ marginBottom: 40, borderBottom: '1px solid #ddd' }}>
         <Col md={12} style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-          <span style={{ marginRight: 20, width: 250, flexShrink: 0 }}>Recherche : </span>
+          <label htmlFor="search" style={{ marginRight: 20, width: 250, flexShrink: 0 }}>
+            Recherche :{' '}
+          </label>
           <Search placeholder="Par nom du lieu" value={search} onChange={setSearch} />
         </Col>
       </Row>
@@ -145,7 +152,7 @@ const Create = () => {
                 <Row>
                   <Col md={6}>
                     <FormGroup>
-                      <div>Nom</div>
+                      <Label htmlFor="create-place-name">Nom</Label>
                       <Input name="name" id="create-place-name" value={values.name} onChange={handleChange} />
                     </FormGroup>
                   </Col>

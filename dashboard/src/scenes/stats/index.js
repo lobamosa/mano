@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { Col, Label, Nav, NavItem, NavLink, Row, TabContent, TabPane } from 'reactstrap';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
@@ -21,14 +21,15 @@ import { CustomResponsiveBar, CustomResponsivePie } from '../../components/chart
 import Filters, { filterData } from '../../components/Filters';
 import Card from '../../components/Card';
 import { currentTeamState, organisationState, teamsState, userState } from '../../recoil/auth';
-import { actionsState } from '../../recoil/actions';
+import { actionsState, DONE, mappedIdsToLabels } from '../../recoil/actions';
 import { reportsState } from '../../recoil/reports';
 import ExportData from '../data-import-export/ExportData';
 import SelectCustom from '../../components/SelectCustom';
 import { territoriesState } from '../../recoil/territory';
-import { getIsDayWithinHoursOffsetOfPeriod } from '../../services/date';
+import { dayjsInstance, getIsDayWithinHoursOffsetOfPeriod } from '../../services/date';
 import { loadingState, refreshTriggerState } from '../../components/Loader';
 import { passagesState } from '../../recoil/passages';
+import useTitle from '../../services/useTitle';
 
 const getDataForPeriod = (data, { startDate, endDate }, currentTeam, viewAllOrganisationData, { filters = [], field = 'createdAt' } = {}) => {
   if (!!filters?.filter((f) => Boolean(f?.value)).length) data = filterData(data, filters);
@@ -42,7 +43,7 @@ const getDataForPeriod = (data, { startDate, endDate }, currentTeam, viewAllOrga
   );
 };
 
-const tabs = ['Général', 'Accueil', 'Actions', 'Personnes suivies', 'Observations', 'Comptes-rendus'];
+const tabs = ['Général', 'Accueil', 'Actions', 'Personnes suivies', 'Passages', 'Observations', 'Comptes-rendus'];
 const Stats = () => {
   const organisation = useRecoilValue(organisationState);
   const user = useRecoilValue(userState);
@@ -65,20 +66,22 @@ const Stats = () => {
   const [filterPersons, setFilterPersons] = useState([]);
   const [viewAllOrganisationData, setViewAllOrganisationData] = useState(teams.length === 1);
   const [period, setPeriod] = useState({ startDate: null, endDate: null });
+  const [actionsStatuses, setActionsStatuses] = useState(DONE);
+
+  useTitle(`${tabs[activeTab]} - Statistiques`);
 
   const addFilter = ({ field, value }) => {
     setFilterPersons((filters) => [...filters, { field, value }]);
   };
-
-  if (loading) return <Loading />;
 
   const persons = getDataForPeriod(
     allPersons.filter((e) => viewAllOrganisationData || (e.assignedTeams || []).includes(currentTeam._id)),
     period,
     currentTeam,
     viewAllOrganisationData,
-    { filters: filterPersons }
+    { filters: filterPersons, field: 'followedSince' }
   );
+
   const actions = getDataForPeriod(
     allActions.filter((e) => viewAllOrganisationData || e.team === currentTeam._id),
     period,
@@ -101,6 +104,27 @@ const Stats = () => {
     viewAllOrganisationData,
     { field: 'date' }
   );
+  const personsInPassagesBeforePeriod = useMemo(() => {
+    if (!period?.startDate) return [];
+    const passagesIds = passages.map((p) => p._id);
+    const passagesNotIncludedInPeriod = allPassages
+      .filter((p) => !passagesIds.includes(p._id))
+      .filter((p) => dayjsInstance(p.date).isBefore(period.startDate));
+    return passagesNotIncludedInPeriod.reduce((personsIds, passage) => {
+      if (!passage.person) return personsIds;
+      if (personsIds.includes(passage.person)) return personsIds;
+      return [...personsIds, passage.person];
+    }, []);
+  }, [allPassages, passages, period.startDate]);
+  const personsInPassagesOfPeriod = useMemo(
+    () =>
+      passages.reduce((personsIds, passage) => {
+        if (!passage.person) return personsIds;
+        if (personsIds.includes(passage.person)) return personsIds;
+        return [...personsIds, passage.person];
+      }, []),
+    [passages]
+  );
 
   const reports = getDataForPeriod(
     allreports.filter((e) => viewAllOrganisationData || e.team === currentTeam._id),
@@ -118,6 +142,8 @@ const Stats = () => {
     ...customFieldsPersonsSocial.filter((a) => a.enabled).map((a) => ({ field: a.name, ...a })),
     ...customFieldsPersonsMedical.filter((a) => a.enabled).map((a) => ({ field: a.name, ...a })),
   ];
+
+  if (loading) return <Loading />;
 
   return (
     <>
@@ -151,8 +177,13 @@ const Stats = () => {
         </Col>
         <Col md={4} style={{ flexShrink: 0 }}>
           {teams.length > 1 && (
-            <label>
-              <input type="checkbox" style={{ marginRight: '1rem' }} onChange={() => setViewAllOrganisationData(!viewAllOrganisationData)} />
+            <label htmlFor="viewAllOrganisationData">
+              <input
+                id="viewAllOrganisationData"
+                type="checkbox"
+                style={{ marginRight: '1rem' }}
+                onChange={() => setViewAllOrganisationData(!viewAllOrganisationData)}
+              />
               Statistiques de toute l'organisation
             </label>
           )}
@@ -202,19 +233,39 @@ const Stats = () => {
         )}
         <TabPane tabId={2}>
           <Title>Statistiques des actions</Title>
+          <Col md={12} style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
+            <label htmlFor="filter-by-status" style={{ marginRight: 20, width: 250, flexShrink: 0 }}>
+              Filtrer par statut :
+            </label>
+            <div style={{ width: 300 }}>
+              <SelectCustom
+                inputId="action-select-status-filter"
+                options={mappedIdsToLabels}
+                getOptionValue={(s) => s._id}
+                getOptionLabel={(s) => s.name}
+                name="status"
+                onChange={(s) => setActionsStatuses(s.map((s) => s._id))}
+                isClearable
+                isMulti
+                value={mappedIdsToLabels.filter((s) => actionsStatuses.includes(s._id))}
+              />
+            </div>
+          </Col>
           <CustomResponsivePie
             title="Répartition des actions par catégorie"
             data={getPieData(
-              actions.reduce((actionsSplitsByCategories, action) => {
-                if (!!action.categories?.length) {
-                  for (const category of action.categories) {
-                    actionsSplitsByCategories.push({ ...action, category });
+              actions
+                .filter((a) => !actionsStatuses.length || actionsStatuses.includes(a.status))
+                .reduce((actionsSplitsByCategories, action) => {
+                  if (!!action.categories?.length) {
+                    for (const category of action.categories) {
+                      actionsSplitsByCategories.push({ ...action, category });
+                    }
+                  } else {
+                    actionsSplitsByCategories.push(action);
                   }
-                } else {
-                  actionsSplitsByCategories.push(action);
-                }
-                return actionsSplitsByCategories;
-              }, []),
+                  return actionsSplitsByCategories;
+                }, []),
               'category',
               { options: organisation.categories }
             )}
@@ -327,9 +378,24 @@ const Stats = () => {
           }
         </TabPane>
         <TabPane tabId={4}>
+          <Title>Statistiques des passages</Title>
+          <Row>
+            <Block data={passages.length} title="Nombre de passages" />
+            <Block data={passages.filter((p) => !p.person).length} title="Nombre de passages anonymes" />
+            <Block data={passages.filter((p) => !!p.person).length} title="Nombre de passages non anonymes" />
+          </Row>
+          <Row>
+            <Block data={personsInPassagesOfPeriod.length} title="Nombre de personnes différentes passées (passages anonymes exclus)" />
+            <Block
+              data={personsInPassagesOfPeriod.filter((personId) => !personsInPassagesBeforePeriod.includes(personId)).length}
+              title="Nombre de nouvelles personnes passées (passages anonymes exclus)"
+            />
+          </Row>
+        </TabPane>
+        <TabPane tabId={5}>
           <Title>Statistiques des observations de territoire</Title>
           <div style={{ maxWidth: '350px', marginBottom: '2rem' }}>
-            <Label>Filter par territoire</Label>
+            <Label htmlFor="filter-territory">Filter par territoire</Label>
             <SelectCustom
               options={territories}
               name="place"
@@ -338,6 +404,7 @@ const Stats = () => {
                 setTerritory(t);
               }}
               isClearable={true}
+              inputId="filter-territory"
               getOptionValue={(i) => i._id}
               getOptionLabel={(i) => i.name}
             />
@@ -377,7 +444,7 @@ const Stats = () => {
               ))}
           </Row>
         </TabPane>
-        <TabPane tabId={5}>
+        <TabPane tabId={6}>
           <Title>Statistiques des comptes-rendus</Title>
           <CustomResponsivePie
             title="Répartition des comptes-rendus par collaboration"
@@ -499,11 +566,11 @@ const StatsCreatedAtRangeBar = ({ persons }) => {
   const categories = ['0-6 mois', '6-12 mois', '1-2 ans', '2-5 ans', '+ 5 ans'];
 
   let data = persons.reduce((newData, person) => {
-    if (!person.createdAt || !person.createdAt.length) {
+    if (!person.followedSince || !person.createdAt || !person.createdAt.length) {
       return newData;
       // newData["Non renseigné"]++;
     }
-    const parsedDate = Date.parse(person.createdAt);
+    const parsedDate = Date.parse(person.followedSince || person.createdAt);
     const fromNowInMonths = (Date.now() - parsedDate) / 1000 / 60 / 60 / 24 / (365.25 / 12);
     if (fromNowInMonths < 6) {
       newData['0-6 mois']++;
@@ -568,8 +635,9 @@ const BlockDateWithTime = ({ data, field }) => {
 };
 
 const BlockCreatedAt = ({ persons }) => {
-  const averageCreatedAt = persons.reduce((total, person) => total + Date.parse(person.createdAt), 0) / (persons.length || 1);
-  const durationFromNowToAverage = Date.now() - averageCreatedAt;
+  const averageFollowedSince =
+    persons.reduce((total, person) => total + Date.parse(person.followedSince || person.createdAt), 0) / (persons.length || 1);
+  const durationFromNowToAverage = Date.now() - averageFollowedSince;
   const [count, unit] = getDuration(durationFromNowToAverage);
 
   return (
