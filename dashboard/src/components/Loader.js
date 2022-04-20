@@ -166,7 +166,7 @@ const Loader = () => {
     Get number of data to download to show the appropriate loading progress bar
     */
     const response = await API.get({
-      path: '/public/stats',
+      path: '/organisation/stats',
       query: { organisation: organisationId, lastRefresh },
     });
     if (!response.ok) {
@@ -208,7 +208,10 @@ const Loader = () => {
         setBatchData: (newPersons) => setPersons((oldPersons) => (initialLoad ? [...oldPersons, ...newPersons] : mergeItems(oldPersons, newPersons))),
         API,
       });
-      if (refreshedPersons) setPersons(refreshedPersons.sort((p1, p2) => p1.name.localeCompare(p2.name)));
+      if (refreshedPersons)
+        setPersons(
+          refreshedPersons.map((p) => ({ ...p, followedSince: p.followedSince || p.createdAt })).sort((p1, p2) => p1.name.localeCompare(p2.name))
+        );
     }
     setCollectionsToLoad((c) => c.filter((collectionName) => collectionName !== 'person'));
     /*

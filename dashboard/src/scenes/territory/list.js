@@ -1,5 +1,5 @@
-import React, { useContext, useMemo, useState } from 'react';
-import { Col, Button as LinkButton, FormGroup, Row, Modal, ModalBody, ModalHeader, Input } from 'reactstrap';
+import React, { useMemo, useState } from 'react';
+import { Col, Button as LinkButton, FormGroup, Row, Modal, ModalBody, ModalHeader, Input, Label } from 'reactstrap';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { toastr } from 'react-redux-toastr';
@@ -12,7 +12,6 @@ import Table from '../../components/table';
 import ButtonCustom from '../../components/ButtonCustom';
 import Search from '../../components/search';
 import { territoryTypes, territoriesState, prepareTerritoryForEncryption } from '../../recoil/territory';
-import PaginationContext from '../../contexts/pagination';
 import SelectCustom from '../../components/SelectCustom';
 import { onlyFilledObservationsTerritories } from '../../recoil/selectors';
 import { currentTeamState, organisationState, userState } from '../../recoil/auth';
@@ -20,12 +19,16 @@ import { formatDateWithFullMonth } from '../../services/date';
 import { refreshTriggerState, loadingState } from '../../components/Loader';
 import useApi from '../../services/api';
 import { filterBySearch } from '../search/utils';
+import useTitle from '../../services/useTitle';
+import useSearchParamState from '../../services/useSearchParamState';
 
 const List = () => {
   const organisation = useRecoilValue(organisationState);
   const history = useHistory();
+  useTitle('Territoires');
 
-  const { search, setSearch, page, setPage } = useContext(PaginationContext);
+  const [page, setPage] = useSearchParamState('page', 0);
+  const [search, setSearch] = useSearchParamState('search', '');
 
   const territories = useRecoilValue(territoriesState);
   const territoryObservations = useRecoilValue(onlyFilledObservationsTerritories);
@@ -65,7 +68,9 @@ const List = () => {
       </Row>
       <Row style={{ marginBottom: 40, borderBottom: '1px solid #ddd' }}>
         <Col md={12} style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-          <span style={{ marginRight: 20, width: 250, flexShrink: 0 }}>Recherche : </span>
+          <label htmlFor="search" style={{ marginRight: 20, width: 250, flexShrink: 0 }}>
+            Recherche :{' '}
+          </label>
           <Search placeholder="Par mot clé, présent dans le nom, une observation, ..." value={search} onChange={setSearch} />
         </Col>
       </Row>
@@ -138,13 +143,13 @@ const CreateTerritory = () => {
                 <Row>
                   <Col md={6}>
                     <FormGroup>
-                      <div>Nom</div>
-                      <Input name="name" value={values.name} onChange={handleChange} />
+                      <Label htmlFor="name">Nom</Label>
+                      <Input name="name" id="name" value={values.name} onChange={handleChange} />
                     </FormGroup>
                   </Col>
                   <Col md={6}>
                     <FormGroup>
-                      <div>Types</div>
+                      <Label htmlFor="territory-select-types">Types</Label>
                       <SelectCustom
                         options={territoryTypes}
                         name="types"
@@ -161,8 +166,8 @@ const CreateTerritory = () => {
                   </Col>
                   <Col md={6}>
                     <FormGroup>
-                      <div>Périmètre</div>
-                      <Input name="perimeter" value={values.perimeter} onChange={handleChange} />
+                      <Label htmlFor="perimeter">Périmètre</Label>
+                      <Input name="perimeter" id="perimeter" value={values.perimeter} onChange={handleChange} />
                     </FormGroup>
                   </Col>
                 </Row>

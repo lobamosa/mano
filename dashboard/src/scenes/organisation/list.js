@@ -11,6 +11,7 @@ import CreateWrapper from '../../components/createWrapper';
 import useApi from '../../services/api';
 import DeleteOrganisation from '../../components/DeleteOrganisation';
 import { formatDateWithFullMonth } from '../../services/date';
+import useTitle from '../../services/useTitle';
 
 const List = () => {
   const [organisations, setOrganisations] = useState(null);
@@ -18,6 +19,7 @@ const List = () => {
   const [sortBy, setSortBy] = useState('countersTotal');
   const [sortOrder, setSortOrder] = useState('DESC');
   const [refresh, setRefresh] = useState(true);
+  useTitle('Organisations');
   const API = useApi();
 
   useEffect(() => {
@@ -169,8 +171,8 @@ const Create = ({ onChange }) => {
                 <Row>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Nom</Label>
-                      <Input name="orgName" value={values.orgName} onChange={handleChange} />
+                      <Label htmlFor="orgName">Nom</Label>
+                      <Input name="orgName" id="orgName" value={values.orgName} onChange={handleChange} />
                       {touched.orgName && errors.orgName && <Error>{errors.orgName}</Error>}
                     </FormGroup>
                   </Col>
@@ -179,15 +181,15 @@ const Create = ({ onChange }) => {
                 <Row>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Nom de l'administrateur</Label>
-                      <Input name="name" value={values.name} onChange={handleChange} />
+                      <Label htmlFor="name">Nom de l'administrateur</Label>
+                      <Input name="name" id="name" value={values.name} onChange={handleChange} />
                       {touched.name && errors.name && <Error>{errors.name}</Error>}
                     </FormGroup>
                   </Col>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Email de l'administrateur</Label>
-                      <Input name="email" value={values.email} onChange={handleChange} />
+                      <Label htmlFor="email">Email de l'administrateur</Label>
+                      <Input name="email" id="email" value={values.email} onChange={handleChange} />
                       {touched.email && errors.email && <Error>{errors.email}</Error>}
                     </FormGroup>
                   </Col>

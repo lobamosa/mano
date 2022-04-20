@@ -27,7 +27,6 @@ describe("Organisation CRUD", () => {
     await expect(page).toMatch("Créer une nouvelle organisation et un administrateur");
     await expect(page).toFill("input[name=orgName]", "My First Orga");
     await expect(page).toClick(".modal-body button[type=submit]");
-    await expect(page).toMatch("Veuillez saisir un nom pour l'administrateur");
     await expect(page).toFill("input[name=name]", "Test First Orga");
     await expect(page).toFill("input[name=email]", "test+firstorga@example.org");
     await expect(page).toClick(".modal-body button[type=submit]");
@@ -46,12 +45,12 @@ describe("Organisation CRUD", () => {
 
   it("should be able to connect as a new user", async () => {
     await connectWith("test+firstorga@example.org", "secret");
-    await expect(page).toMatch("Charte des Utilisateurs de Mano");
+    await expect(page).toMatch("Charte d'Utilisation de Mano");
     await new Promise((resolve) => setTimeout(resolve, 3000));
     await page.evaluate(async (_) => {
       return new Promise((resolve) => {
         setTimeout(() => {
-          document?.querySelector(".main > div")?.scrollBy(0, 3000000);
+          document?.getElementById("charte")?.scrollBy(0, 3000000);
           resolve("ok");
         }, 500);
       });

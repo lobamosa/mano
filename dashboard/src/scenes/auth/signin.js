@@ -168,6 +168,11 @@ const SignIn = () => {
               return;
             }
             // basic login
+            if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_SKIP_TEAMS === 'true') {
+              setCurrentTeam(teams[0]);
+              onSigninValidated();
+              return;
+            }
             if (user.teams.length === 1) {
               setCurrentTeam(user.teams[0]);
               onSigninValidated();
@@ -201,6 +206,7 @@ const SignIn = () => {
                         name="email"
                         type="email"
                         id="email"
+                        autoComplete="email"
                         value={values.email}
                         onChange={handleChangeRequest}
                       />
@@ -215,6 +221,7 @@ const SignIn = () => {
                         validate={(v) => validator.isEmpty(v) && 'Ce champ est obligatoire'}
                         name="password"
                         id="password"
+                        autoComplete="current-password"
                         value={values.password}
                         onChange={handleChangeRequest}
                         setShowPassword={setShowPassword}

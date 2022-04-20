@@ -15,8 +15,9 @@ import Table from './table';
 import ActionStatus from './ActionStatus';
 import ActionName from './ActionName';
 import PersonName from './PersonName';
+import ExclamationMarkButton from './ExclamationMarkButton';
 
-const ActionsCalendar = ({ actions, columns = ['Heure', 'Nom', 'Personne suivie', 'Créée le', 'Status'] }) => {
+const ActionsCalendar = ({ actions, columns = ['Heure', 'Nom', 'Personne suivie', 'Créée le', 'Statut'] }) => {
   const history = useHistory();
   const location = useLocation();
   const [theDayBeforeActions, setTheDayBeforeActions] = useState([]);
@@ -56,13 +57,22 @@ const ActionsCalendar = ({ actions, columns = ['Heure', 'Nom', 'Personne suivie'
     <Table
       className="Table"
       noData={`Pas d'action à faire le ${formatDateTimeWithNameOfDay(date)}`}
-      data={actions}
+      data={actions.map((a) => (a.urgent ? { ...a, style: { backgroundColor: '#fecaca' } } : a))}
       onRowClick={(action) => history.push(`/action/${action._id}`)}
       rowKey="_id"
       columns={[
         {
+          title: '',
+          dataKey: 'urgent',
+          small: true,
+          render: (action) => {
+            return action.urgent ? <ExclamationMarkButton /> : null;
+          },
+        },
+        {
           title: 'Heure',
           dataKey: '_id',
+          small: true,
           render: (action) => {
             if (!action.dueAt || !action.withTime) return null;
             return formatTime(action.dueAt);
@@ -79,8 +89,8 @@ const ActionsCalendar = ({ actions, columns = ['Heure', 'Nom', 'Personne suivie'
           render: (action) => <PersonName item={action} />,
         },
         { title: 'Créée le', dataKey: 'createdAt', render: (action) => formatDateWithFullMonth(action.createdAt || '') },
-        { title: 'Status', dataKey: 'status', render: (action) => <ActionStatus status={action.status} /> },
-      ].filter((column) => columns.includes(column.title))}
+        { title: 'Statut', dataKey: 'status', render: (action) => <ActionStatus status={action.status} /> },
+      ].filter((column) => columns.includes(column.title) || column.dataKey === 'urgent')}
     />
   );
 

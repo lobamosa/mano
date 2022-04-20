@@ -6,7 +6,7 @@ import { Formik } from 'formik';
 import { toastr } from 'react-redux-toastr';
 import styled from 'styled-components';
 import DatePicker from 'react-datepicker';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import CustomFieldInput from '../../components/CustomFieldInput';
 import TagTeam from '../../components/TagTeam';
 import { SmallerHeaderWithBackButton } from '../../components/header';
@@ -33,7 +33,7 @@ import {
   preparePersonForEncryption,
   commentForUpdatePerson,
 } from '../../recoil/persons';
-import { actionsState } from '../../recoil/actions';
+import { actionsState, mappedIdsToLabels } from '../../recoil/actions';
 import UserName from '../../components/UserName';
 import SelectCustom from '../../components/SelectCustom';
 import SelectAsInput from '../../components/SelectAsInput';
@@ -48,10 +48,11 @@ import useApi from '../../services/api';
 import { commentsState, prepareCommentForEncryption } from '../../recoil/comments';
 import DeletePerson from './DeletePerson';
 import { MedicalFile } from './MedicalFile';
-import { ENV } from '../../config';
 import { passagesState } from '../../recoil/passages';
 import DateBloc from '../../components/DateBloc';
 import Passage from '../../components/Passage';
+import ExclamationMarkButton from '../../components/ExclamationMarkButton';
+import useTitle from '../../services/useTitle';
 
 const initTabs = ['Résumé', 'Dossier Médical', 'Actions', 'Commentaires', 'Passages', 'Lieux', 'Documents'];
 
@@ -59,10 +60,13 @@ const View = () => {
   const { id } = useParams();
   const location = useLocation();
   const history = useHistory();
-  const persons = useRecoilValue(personsState);
+  const API = useApi();
+  const [persons, setPersons] = useRecoilState(personsState);
   const user = useRecoilValue(userState);
   const organisation = useRecoilValue(organisationState);
   const setRefreshTrigger = useSetRecoilState(refreshTriggerState);
+  const customFieldsPersonsSocial = useRecoilValue(customFieldsPersonsSocialSelector);
+  const customFieldsPersonsMedical = useRecoilValue(customFieldsPersonsMedicalSelector);
   const [tabsContents, setTabsContents] = useState(initTabs);
   const searchParams = new URLSearchParams(location.search);
   const [activeTab, setActiveTab] = useState(
@@ -72,6 +76,7 @@ const View = () => {
   const updateTabContent = (tabIndex, content) => setTabsContents((contents) => contents.map((c, index) => (index === tabIndex ? content : c)));
 
   const person = persons.find((p) => p._id === id) || {};
+  useTitle(`${person?.name} - Personne`);
 
   return (
     <StyledContainer>
@@ -86,7 +91,26 @@ const View = () => {
       />
       <Title className="noprint">
         {`Dossier de ${person?.name}`}
-        <UserName id={person.user} wrapper={(name) => ` (créée par ${name})`} />
+        <UserName
+          id={person.user}
+          wrapper={() => 'créée par '}
+          canAddUser
+          handleChange={async (newUser) => {
+            const response = await API.put({
+              path: `/person/${person._id}`,
+              body: preparePersonForEncryption(customFieldsPersonsMedical, customFieldsPersonsSocial)({ ...person, user: newUser }),
+            });
+            if (response.ok) {
+              const newPerson = response.decryptedData;
+              setPersons((persons) =>
+                persons.map((p) => {
+                  if (p._id === person._id) return newPerson;
+                  return p;
+                })
+              );
+            }
+          }}
+        />
       </Title>
       {person.outOfActiveList && (
         <Alert color="warning" className="noprint">
@@ -96,18 +120,9 @@ const View = () => {
       <Nav tabs fill style={{ marginTop: 20, marginBottom: 0 }} className="noprint">
         {tabsContents.map((tabCaption, index) => {
           if (!organisation.receptionEnabled && tabCaption.includes('Passages')) return null;
+          if (!user.healthcareProfessional && tabCaption.includes('Dossier Médical')) return null;
           return (
-            <NavItem
-              // This implementation is temporary. Currently, the tabs are not dynamic so we have to hide them when disabled.
-              // Also, this is currently only displayed in localhost. Todo: fix me!
-              className={`${
-                initTabs[index].toLowerCase() === 'dossier médical' &&
-                !((user.healthcareProfessional && ENV === 'development') || user._id === '09ec2a60-8471-4f4a-ad62-74b2424df28b')
-                  ? 'd-none'
-                  : ''
-              }`}
-              key={index}
-              style={{ cursor: 'pointer' }}>
+            <NavItem key={index} style={{ cursor: 'pointer' }}>
               <NavLink
                 key={index}
                 className={`${activeTab === index ? 'active' : ''}`}
@@ -202,18 +217,18 @@ const Summary = ({ person }) => {
               <Row>
                 <Col md={4}>
                   <FormGroup>
-                    <Label>Nom prénom ou Pseudonyme</Label>
-                    <Input name="name" value={values.name || ''} onChange={handleChange} />
+                    <Label htmlFor="name">Nom prénom ou Pseudonyme</Label>
+                    <Input name="name" id="name" value={values.name || ''} onChange={handleChange} />
                   </FormGroup>
                 </Col>
                 <Col md={4}>
                   <FormGroup>
-                    <Label>Autres pseudos</Label>
-                    <Input name="otherNames" value={values.otherNames || ''} onChange={handleChange} />
+                    <Label htmlFor="otherNames">Autres pseudos</Label>
+                    <Input name="otherNames" id="otherNames" value={values.otherNames || ''} onChange={handleChange} />
                   </FormGroup>
                 </Col>
                 <Col md={4}>
-                  <Label>Genre</Label>
+                  <Label htmlFor="person-select-gender">Genre</Label>
                   <SelectAsInput
                     options={genderOptions}
                     name="gender"
@@ -226,7 +241,7 @@ const Summary = ({ person }) => {
 
                 <Col md={4}>
                   <FormGroup>
-                    <Label>Date de naissance</Label>
+                    <Label htmlFor="person-birthdate">Date de naissance</Label>
                     <div>
                       <DatePicker
                         locale="fr"
@@ -241,7 +256,7 @@ const Summary = ({ person }) => {
                 </Col>
                 <Col md={4}>
                   <FormGroup>
-                    <Label>En rue depuis le</Label>
+                    <Label htmlFor="person-wanderingAt">En rue depuis le</Label>
                     <div>
                       <DatePicker
                         locale="fr"
@@ -256,7 +271,7 @@ const Summary = ({ person }) => {
                 </Col>
                 <Col md={4}>
                   <FormGroup>
-                    <Label>Suivi(e) depuis le / Créé(e) le</Label>
+                    <Label htmlFor="person-followedSince">Suivi(e) depuis le / Créé(e) le</Label>
                     <div>
                       <DatePicker
                         locale="fr"
@@ -271,7 +286,7 @@ const Summary = ({ person }) => {
                 </Col>
                 <Col md={6}>
                   <FormGroup>
-                    <Label>Équipe(s) en charge</Label>
+                    <Label htmlFor="person-select-assigned-team">Équipe(s) en charge</Label>
                     <div>
                       <SelectTeamMultiple
                         onChange={(teams) => handleChange({ target: { value: teams || [], name: 'assignedTeams' } })}
@@ -287,21 +302,21 @@ const Summary = ({ person }) => {
                   <FormGroup>
                     <Label />
                     <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 20, width: '80%' }}>
-                      <span>Personne très vulnérable, ou ayant besoin d'une attention particulière</span>
+                      <label htmlFor="person-alertness-checkbox">Personne très vulnérable, ou ayant besoin d'une attention particulière</label>
                       <Input id="person-alertness-checkbox" type="checkbox" name="alertness" checked={values.alertness} onChange={handleChange} />
                     </div>
                   </FormGroup>
                 </Col>
                 <Col md={12}>
                   <FormGroup>
-                    <Label>Téléphone</Label>
-                    <Input name="phone" value={values.phone || ''} onChange={handleChange} />
+                    <Label htmlFor="phone">Téléphone</Label>
+                    <Input name="phone" id="phone" value={values.phone || ''} onChange={handleChange} />
                   </FormGroup>
                 </Col>
                 <Col md={12}>
                   <FormGroup>
-                    <Label>Description</Label>
-                    <Input type="textarea" rows={5} name="description" value={values.description || ''} onChange={handleChange} />
+                    <Label htmlFor="description">Description</Label>
+                    <Input type="textarea" rows={5} name="description" id="description" value={values.description || ''} onChange={handleChange} />
                   </FormGroup>
                 </Col>
               </Row>
@@ -309,7 +324,7 @@ const Summary = ({ person }) => {
               <Title>Dossier social</Title>
               <Row>
                 <Col md={4}>
-                  <Label>Situation personnelle</Label>
+                  <Label htmlFor="person-select-personalSituation">Situation personnelle</Label>
                   <SelectAsInput
                     options={personalSituationOptions}
                     name="personalSituation"
@@ -321,13 +336,13 @@ const Summary = ({ person }) => {
                 </Col>
                 <Col md={4}>
                   <FormGroup>
-                    <Label>Structure de suivi social</Label>
-                    <Input name="structureSocial" value={values.structureSocial || ''} onChange={handleChange} />
+                    <Label htmlFor="structureSocial">Structure de suivi social</Label>
+                    <Input name="structureSocial" id="structureSocial" value={values.structureSocial || ''} onChange={handleChange} />
                   </FormGroup>
                 </Col>
                 <Col md={4}>
                   <FormGroup>
-                    <Label>Avec animaux</Label>
+                    <Label htmlFor="person-select-animals">Avec animaux</Label>
                     <SelectAsInput
                       options={yesNoOptions}
                       name="hasAnimal"
@@ -340,7 +355,7 @@ const Summary = ({ person }) => {
                 </Col>
                 <Col md={4}>
                   <FormGroup>
-                    <Label>Hébergement</Label>
+                    <Label htmlFor="person-select-address">Hébergement</Label>
                     <SelectAsInput
                       options={yesNoOptions}
                       name="address"
@@ -356,7 +371,7 @@ const Summary = ({ person }) => {
 
                 <Col md={4}>
                   <FormGroup>
-                    <Label>Nationalité</Label>
+                    <Label htmlFor="person-select-nationalitySituation">Nationalité</Label>
                     <SelectAsInput
                       options={nationalitySituationOptions}
                       name="nationalitySituation"
@@ -369,7 +384,7 @@ const Summary = ({ person }) => {
                 </Col>
                 <Col md={4}>
                   <FormGroup>
-                    <Label>Emploi</Label>
+                    <Label htmlFor="person-select-employment">Emploi</Label>
                     <SelectAsInput
                       options={employmentOptions}
                       name="employment"
@@ -399,7 +414,7 @@ const Summary = ({ person }) => {
               <Title>Dossier médical</Title>
               <Row>
                 <Col md={4}>
-                  <Label>Couverture médicale</Label>
+                  <Label htmlFor="person-select-healthInsurance">Couverture médicale</Label>
                   <SelectAsInput
                     options={healthInsuranceOptions}
                     name="healthInsurance"
@@ -411,8 +426,8 @@ const Summary = ({ person }) => {
                 </Col>
                 <Col md={4}>
                   <FormGroup>
-                    <Label>Structure de suivi médical</Label>
-                    <Input name="structureMedical" value={values.structureMedical} onChange={handleChange} />
+                    <Label htmlFor="structureMedical">Structure de suivi médical</Label>
+                    <Input name="structureMedical" id="structureMedical" value={values.structureMedical} onChange={handleChange} />
                   </FormGroup>
                 </Col>
                 {customFieldsPersonsMedical
@@ -440,13 +455,30 @@ const Summary = ({ person }) => {
 
 const Actions = ({ person, onUpdateResults }) => {
   const actions = useRecoilValue(actionsState);
-  const [data, setData] = useState([]);
   const history = useHistory();
+  const organisation = useRecoilValue(organisationState);
+  const [filterCategories, setFilterCategories] = useState([]);
+  const [filterStatus, setFilterStatus] = useState([]);
 
-  useEffect(() => {
-    if (!person) return;
-    setData(actions.filter((a) => a.person === person._id).sort((p1, p2) => (p1.dueAt > p2.dueAt ? -1 : 1)));
-  }, [actions, person]);
+  const catsSelect = ['-- Aucune --', ...(organisation.categories || [])];
+
+  const data = useMemo(() => {
+    if (!person) return [];
+    return actions.filter((a) => a.person === person._id);
+  }, [person, actions]);
+
+  const filteredData = useMemo(() => {
+    let actionsToSet = data;
+    if (filterCategories.length) {
+      actionsToSet = actionsToSet.filter((a) =>
+        filterCategories.some((c) => (c === '-- Aucune --' ? a.categories?.length === 0 : a.categories?.includes(c)))
+      );
+    }
+    if (filterStatus.length) {
+      actionsToSet = actionsToSet.filter((a) => filterStatus.some((s) => a.status === s));
+    }
+    return actionsToSet.sort((p1, p2) => (p1.dueAt > p2.dueAt ? -1 : 1)).map((a) => (a.urgent ? { ...a, style: { backgroundColor: '#fecaca' } } : a));
+  }, [data, filterCategories, filterStatus]);
 
   useEffect(() => {
     onUpdateResults(data.length);
@@ -459,11 +491,55 @@ const Actions = ({ person, onUpdateResults }) => {
         <Title>Actions</Title>
         <CreateAction person={person._id} />
       </div>
+      {data.length ? (
+        <Row>
+          <Col md={6}>
+            <Label htmlFor="action-select-categories-filter">Filtrer par catégorie</Label>
+            <SelectCustom
+              options={catsSelect}
+              inputId="action-select-categories-filter"
+              name="categories"
+              onChange={(c) => {
+                setFilterCategories(c);
+              }}
+              isClearable
+              isMulti
+              getOptionValue={(c) => c}
+              getOptionLabel={(c) => c}
+            />
+          </Col>
+          <Col md={6}>
+            <Label htmlFor="action-select-status-filter">Filtrer par statut</Label>
+            <SelectCustom
+              inputId="action-select-status-filter"
+              options={mappedIdsToLabels}
+              getOptionValue={(s) => s._id}
+              getOptionLabel={(s) => s.name}
+              name="status"
+              onChange={(s) => {
+                setFilterStatus(s.map((s) => s._id));
+              }}
+              isClearable
+              isMulti
+            />
+          </Col>
+        </Row>
+      ) : null}
+
       <StyledTable
-        data={data}
+        data={filteredData}
         rowKey={'_id'}
         onRowClick={(action) => history.push(`/action/${action._id}`)}
+        noData={data.length && !filteredData.length ? 'Aucune action trouvée' : 'Aucune action'}
         columns={[
+          {
+            title: '',
+            dataKey: 'urgent',
+            small: true,
+            render: (action) => {
+              return action.urgent ? <ExclamationMarkButton /> : null;
+            },
+          },
           { title: 'À faire le', dataKey: 'dueAt', render: (action) => <DateBloc date={action.dueAt} /> },
           {
             title: 'Heure',
@@ -474,7 +550,7 @@ const Actions = ({ person, onUpdateResults }) => {
             },
           },
           { title: 'Nom', dataKey: 'name', render: (action) => <ActionName action={action} /> },
-          { title: 'Status', dataKey: 'status', render: (action) => <ActionStatus status={action.status} /> },
+          { title: 'Statut', dataKey: 'status', render: (action) => <ActionStatus status={action.status} /> },
           {
             title: 'Équipe',
             dataKey: 'team',
@@ -596,7 +672,7 @@ const AddressDetails = ({ values, onChange }) => {
     <>
       <Col md={4}>
         <FormGroup>
-          <Label>Type d'hébergement</Label>
+          <Label htmlFor="person-select-addressDetail">Type d'hébergement</Label>
           <SelectAsInput
             isDisabled={values.address !== 'Oui'}
             name="addressDetail"
@@ -611,7 +687,7 @@ const AddressDetails = ({ values, onChange }) => {
       <Col md={4}>
         {!!isFreeFieldAddressDetail(values.addressDetail) && (
           <FormGroup>
-            <Label>Autre type d'hébergement</Label>
+            <Label htmlFor="addressDetail">Autre type d'hébergement</Label>
             <Input name="addressDetail" value={values.addressDetail === 'Autre' ? '' : values.addressDetail} onChange={onChangeRequest} />
           </FormGroup>
         )}
@@ -622,7 +698,7 @@ const AddressDetails = ({ values, onChange }) => {
 
 const Reasons = ({ value, onChange }) => (
   <FormGroup>
-    <Label>Motif de la situation en rue</Label>
+    <Label htmlFor="person-select-reasons">Motif de la situation en rue</Label>
     <SelectCustom
       options={reasonsOptions}
       name="reasons"
@@ -640,7 +716,7 @@ const Reasons = ({ value, onChange }) => (
 
 const Ressources = ({ value, onChange }) => (
   <FormGroup>
-    <Label>Ressources</Label>
+    <Label htmlFor="person-select-resources">Ressources</Label>
     <SelectCustom
       options={ressourcesOptions}
       name="resources"

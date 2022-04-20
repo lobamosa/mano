@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Col, FormGroup, Input, Modal, ModalBody, ModalHeader, Row } from 'reactstrap';
+import { Col, FormGroup, Input, Label, Modal, ModalBody, ModalHeader, Row } from 'reactstrap';
 import { useHistory } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { SmallerHeaderWithBackButton } from '../../components/header';
@@ -14,6 +14,7 @@ import Search from '../../components/search';
 import { currentTeamState } from '../../recoil/auth';
 import useApi from '../../services/api';
 import { formatDateWithFullMonth } from '../../services/date';
+import useTitle from '../../services/useTitle';
 
 const List = () => {
   const [structures, setStructures] = useState(null);
@@ -21,6 +22,7 @@ const List = () => {
   const [pagination, setPagination] = useState();
   const [refresh, setRefresh] = useState(false);
   const [search, setSearch] = useState('');
+  useTitle('Structures');
   const API = useApi();
 
   useEffect(() => {
@@ -47,7 +49,9 @@ const List = () => {
       </Row>
       <Row style={{ marginBottom: 40, borderBottom: '1px solid #ddd' }}>
         <Col md={12} style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
-          <span style={{ marginRight: 20, width: 250, flexShrink: 0 }}>Recherche : </span>
+          <label htmlFor="search" style={{ marginRight: 20, width: 250, flexShrink: 0 }}>
+            Recherche :{' '}
+          </label>
           <Search placeholder="Par nom de la structure" value={search} onChange={setSearch} />
         </Col>
       </Row>
@@ -103,8 +107,8 @@ const Create = ({ onChange }) => {
                 <Row>
                   <Col md={6}>
                     <FormGroup>
-                      <div>Nom</div>
-                      <Input name="name" value={values.name} onChange={handleChange} />
+                      <Label htmlFor="name">Nom</Label>
+                      <Input name="name" id="name" value={values.name} onChange={handleChange} />
                     </FormGroup>
                   </Col>
                 </Row>

@@ -17,7 +17,7 @@ dayjs.extend(utc);
 dayjs.locale("fr");
 
 jest.setTimeout(100000);
-setDefaultOptions({ timeout: 60000 });
+setDefaultOptions({ timeout: 100000 });
 
 describe("Organisation CRUD", () => {
   beforeAll(async () => {
@@ -251,6 +251,7 @@ describe("Organisation CRUD", () => {
     await expect(page).toFill('textarea[name="description"]', "Ceci est une description");
     await expect(page).toClick("button", { text: "Enregistrer" });
     await expect(page).toClick("div.close-toastr");
+    await expect(page).toMatch("Description", { timeout: 2000 });
     await expect(page).toMatch("Ceci est une description");
   });
 });

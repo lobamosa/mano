@@ -16,12 +16,14 @@ import TagTeam from '../../components/TagTeam';
 import { userState } from '../../recoil/auth';
 import useApi from '../../services/api';
 import { formatDateWithFullMonth } from '../../services/date';
+import useTitle from '../../services/useTitle';
 
 const List = () => {
   const [users, setUsers] = useState(null);
   const history = useHistory();
   const [refresh, setRefresh] = useState(false);
   const user = useRecoilValue(userState);
+  useTitle('Utilisateurs');
   const API = useApi();
 
   const getUsers = async () => {
@@ -124,48 +126,51 @@ const Create = ({ onChange }) => {
                 <Row>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Nom</Label>
-                      <Input name="name" value={values.name} onChange={handleChange} />
+                      <Label htmlFor="name">Nom</Label>
+                      <Input name="name" id="name" value={values.name} onChange={handleChange} />
                       {touched.name && errors.name && <Error>{errors.name}</Error>}
                     </FormGroup>
                   </Col>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Email</Label>
-                      <Input name="email" value={values.email} onChange={handleChange} />
+                      <Label htmlFor="email">Email</Label>
+                      <Input name="email" id="email" value={values.email} onChange={handleChange} />
                       {touched.email && errors.email && <Error>{errors.email}</Error>}
                     </FormGroup>
                   </Col>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Role</Label>
+                      <Label htmlFor="role">Role</Label>
                       <SelectCustom
                         options={['normal', 'admin'].map((role) => ({ value: role, label: role }))}
                         onChange={({ value }) => handleChange({ target: { value, name: 'role' } })}
                         value={{ value: values.role, label: values.role }}
+                        inputId="role"
                       />
                       {touched.role && errors.role && <Error>{errors.role}</Error>}
                     </FormGroup>
                   </Col>
                   <Col md={6}>
                     <FormGroup>
-                      <Label>Équipes</Label>
+                      <Label htmlFor="team">Équipes</Label>
                       <div>
                         <SelectTeamMultiple
                           onChange={(team) => handleChange({ target: { value: team || [], name: 'team' } })}
                           value={values.team || []}
                           colored
+                          inputId="team"
                         />
                         {touched.team && errors.team && <Error>{errors.team}</Error>}
                       </div>
                     </FormGroup>
                   </Col>
                   <Col md={12}>
-                    <Label style={{ marginBottom: 0 }}>
+                    <Label htmlFor="healthcareProfessional" style={{ marginBottom: 0 }}>
                       <input
                         type="checkbox"
                         style={{ marginRight: '0.5rem' }}
                         name="healthcareProfessional"
+                        id="healthcareProfessional"
                         checked={values.healthcareProfessional}
                         onChange={handleChange}
                       />
