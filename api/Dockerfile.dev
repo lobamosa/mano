@@ -3,7 +3,7 @@ FROM node:16-alpine
 WORKDIR /app
 
 RUN chown node:node /app
-COPY api/. .
+COPY . .
 
 RUN yarn --frozen-lockfile
 
