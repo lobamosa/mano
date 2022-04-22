@@ -4,7 +4,7 @@ import Oidc from "./oidc"
 const Router = () => {
   return (
     <Switch>
-      <Route path="/oidc" component={Oidc} />
+      <Route path="/ldap" component={Ldap} />
     </Switch>
   );
 };

@@ -13,7 +13,7 @@ import { encryptVerificationKey } from '../../services/encryption';
 import ButtonCustom from '../../components/ButtonCustom';
 import PasswordInput from '../../components/PasswordInput';
 
-const Oidc = () => {
+const Ldap = () => {
   const [organisation, setOrganisation] = useRecoilState(organisationState);
   const setCurrentTeam = useSetRecoilState(currentTeamState);
   const [password, setPassword] = useState('');
