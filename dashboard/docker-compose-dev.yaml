@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  dashboard:
+    container_name: dashboard
+    env_file: 
+      - .env
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes: 
+      - .:/app
+    ports: 
+       - 4145:4145
+    networks:
+      mano:
+networks:
+  mano:
+    external:
+      name: mano
