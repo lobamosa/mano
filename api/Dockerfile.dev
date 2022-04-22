@@ -5,7 +5,6 @@ WORKDIR /app
 RUN chown node:node /app
 COPY . .
 
-RUN yarn --frozen-lockfile
 
 USER node
 
