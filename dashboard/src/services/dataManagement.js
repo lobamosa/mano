@@ -1,11 +1,12 @@
 /* eslint-disable no-throw-literal */
-import { useState } from 'react';
-// import MMKVStorage from 'react-native-mmkv-storage';
+import localforage from 'localforage';
 
 export const mergeNewUpdatedData = (newData, oldData) => {
   const oldDataIds = oldData.map((p) => p._id);
   const updatedItems = newData.filter((p) => oldDataIds.includes(p._id));
   const newItems = newData.filter((p) => !oldDataIds.includes(p._id));
+  const deletedItemsIds = newData.filter((p) => !!p.deletedAt).map((p) => p._id);
+
   return [
     ...newItems,
     ...oldData.map((person) => {
@@ -13,21 +14,20 @@ export const mergeNewUpdatedData = (newData, oldData) => {
       if (updatedItem) return updatedItem;
       return person;
     }),
-  ];
+  ].filter((p) => !deletedItemsIds.includes(p._id));
 };
 
-// export const useStorage = (key, defaultValue) => {
-//   const [value, setValue] = useMMKVStorage(key, MMKV, defaultValue);
-//   return [value, setValue];
-// };
+localforage.config({
+  name: 'mano-dashboard',
+  version: 1.0,
+  storeName: 'mano_cache', // Should be alphanumeric, with underscores.
+  description: 'save Mano organisation data to cache to make the app faster',
+});
 
-// app feature only
-export const MMKV = null;
-
-export const useStorage = (key, defaultValue) => {
-  const [value, setValue] = useState(defaultValue);
-  return [value, setValue];
-};
+export function clearCache() {
+  localforage?.clear();
+  window.localStorage?.clear();
+}
 
 // Get data from server (no cache yet).
 export async function getData({
@@ -39,11 +39,21 @@ export async function getData({
   setBatchData = null,
   lastRefresh = 0,
 }) {
-  const response = await API.get({ path: `/${collectionName}`, batch: 1000, setProgress, query: { lastRefresh }, setBatchData });
-  if (!response.ok) console.log({ message: `Error getting ${collectionName} data`, response });
-  if (response.ok && response.decryptedData && response.decryptedData.length) {
-    data = mergeNewUpdatedData(response.decryptedData, data);
+  if (isInitialization) {
+    data = (await localforage.getItem(collectionName)) || [];
   }
-  // await MMKV.setMapAsync(collectionName, data);
+  const response = await API.get({
+    path: `/${collectionName}`,
+    batch: 1000,
+    setProgress,
+    query: { after: lastRefresh, withDeleted: Boolean(lastRefresh) },
+    setBatchData,
+  });
+
+  if (!response.ok) console.log({ message: `Error getting ${collectionName} data`, response });
+  if (!response.decryptedData.length && !isInitialization) return null;
+
+  data = mergeNewUpdatedData(response.decryptedData, data, collectionName === 'action');
+  await localforage.setItem(collectionName, data);
   return data;
 }

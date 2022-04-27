@@ -1,6 +1,7 @@
 const passwordValidator = require("password-validator");
 const bcrypt = require("bcryptjs");
 const { z } = require("zod");
+const sanitizeHtml = require("sanitize-html");
 
 function validatePassword(password) {
   const schema = new passwordValidator();
@@ -45,6 +46,10 @@ const customFieldSchema = z
   })
   .strict();
 
+function sanitizeAll(text) {
+  return sanitizeHtml(text || "", { allowedTags: [], allowedAttributes: {} });
+}
+
 module.exports = {
   validatePassword,
   comparePassword,
@@ -54,4 +59,5 @@ module.exports = {
   cryptoHexRegex,
   jwtRegex,
   customFieldSchema,
+  sanitizeAll,
 };

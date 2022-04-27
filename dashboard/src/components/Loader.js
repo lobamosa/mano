@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { theme } from '../config';
 import picture1 from '../assets/MANO_livraison_elements-07_green.png';
@@ -53,9 +53,16 @@ export const refreshTriggerState = atom({
   },
 });
 
-const lastRefreshState = atom({
+export const lastRefreshState = atom({
   key: 'lastRefreshState',
-  default: 0,
+  default: window.localStorage.getItem('mano-last-refresh-2022-04-26') || 0,
+  effects: [
+    ({ onSet }) => {
+      onSet((newValue) => {
+        window.localStorage.setItem('mano-last-refresh-2022-04-26', newValue);
+      });
+    },
+  ],
 });
 
 const mergeItems = (oldItems, newItems) => {
@@ -85,8 +92,16 @@ const Loader = () => {
   const [relsPersonPlace, setRelsPersonPlace] = useRecoilState(relsPersonPlaceState);
   const [territoryObservations, setTerritoryObs] = useRecoilState(territoryObservationsState);
   const [comments, setComments] = useRecoilState(commentsState);
+  const [refreshTrigger, setRefreshTrigger] = useRecoilState(refreshTriggerState);
+
+  // to prevent auto-refresh to trigger on the first render
+  const initialLoadDone = useRef(null);
+  const autoRefreshInterval = useRef(null);
 
   const refresh = async () => {
+    clearInterval(autoRefreshInterval.current);
+    autoRefreshInterval.current = null;
+
     const { showFullScreen, initialLoad } = refreshTrigger.options;
     setFullScreen(showFullScreen);
     setLoading(initialLoad ? 'Chargement...' : 'Rafraichissement...');
@@ -188,8 +203,13 @@ const Loader = () => {
       response.data.passages +
       response.data.reports +
       response.data.relsPersonPlace;
+    if (initialLoad) {
+      const numberOfCollections = 9;
+      total = total + numberOfCollections; // for the progress bar to be beautiful
+    }
 
     if (!total) {
+      // if nothing to load, just show a beautiful progress bar
       setLoading('');
       setProgress(1);
       await new Promise((res) => setTimeout(res, 500));
@@ -197,7 +217,7 @@ const Loader = () => {
     /*
     Get persons
     */
-    if (response.data.persons) {
+    if (response.data.persons || initialLoad) {
       setLoading('Chargement des personnes');
       const refreshedPersons = await getData({
         collectionName: 'person',
@@ -227,7 +247,7 @@ const Loader = () => {
     QUICK WIN: filter those reports from recoil state
     */
 
-    if (response.data.reports) {
+    if (response.data.reports || initialLoad) {
       setLoading('Chargement des comptes-rendus');
       const refreshedReports = await getData({
         collectionName: 'report',
@@ -249,7 +269,7 @@ const Loader = () => {
     /*
     Get passages
     */
-    if (response.data.passages) {
+    if (response.data.passages || initialLoad) {
       setLoading('Chargement des passages');
       const refreshedPassages = await getData({
         collectionName: 'passage',
@@ -272,7 +292,7 @@ const Loader = () => {
     /*
     Get actions
     */
-    if (response.data.actions) {
+    if (response.data.actions || initialLoad) {
       setLoading('Chargement des actions');
       const refreshedActions = await getData({
         collectionName: 'action',
@@ -289,7 +309,7 @@ const Loader = () => {
     /*
     Get territories
     */
-    if (response.data.territories) {
+    if (response.data.territories || initialLoad) {
       setLoading('Chargement des territoires');
       const refreshedTerritories = await getData({
         collectionName: 'territory',
@@ -308,7 +328,7 @@ const Loader = () => {
     /*
     Get places
     */
-    if (response.data.places) {
+    if (response.data.places || initialLoad) {
       setLoading('Chargement des lieux');
       const refreshedPlaces = await getData({
         collectionName: 'place',
@@ -321,7 +341,7 @@ const Loader = () => {
       });
       if (refreshedPlaces) setPlaces(refreshedPlaces.sort((p1, p2) => p1.name.localeCompare(p2.name)));
     }
-    if (response.data.relsPersonPlace) {
+    if (response.data.relsPersonPlace || initialLoad) {
       const refreshedRelPersonPlaces = await getData({
         collectionName: 'relPersonPlace',
         data: relsPersonPlace,
@@ -338,7 +358,7 @@ const Loader = () => {
     /*
     Get observations territories
     */
-    if (response.data.territoryObservations) {
+    if (response.data.territoryObservations || initialLoad) {
       setLoading('Chargement des observations');
       const refreshedObs = await getData({
         collectionName: 'territory-observation',
@@ -355,7 +375,7 @@ const Loader = () => {
     /*
     Get comments
     */
-    if (response.data.comments) {
+    if (response.data.comments || initialLoad) {
       setLoading('Chargement des commentaires');
       const refreshedComments = await getData({
         collectionName: 'comment',
@@ -374,6 +394,7 @@ const Loader = () => {
     /*
     Reset refresh trigger
     */
+    initialLoadDone.current = true;
     await new Promise((res) => setTimeout(res, 150));
     setLastRefresh(Date.now());
     setLoading('');
@@ -385,13 +406,42 @@ const Loader = () => {
     });
   };
 
-  const [refreshTrigger, setRefreshTrigger] = useRecoilState(refreshTriggerState);
   useEffect(() => {
     if (refreshTrigger.status === true) {
       refresh();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refreshTrigger.status]);
+
+  useEffect(() => {
+    if (!autoRefreshInterval.current && initialLoadDone.current) {
+      autoRefreshInterval.current = setInterval(async () => {
+        const response = await API.get({
+          path: '/organisation/stats',
+          query: { organisation: organisationId, lastRefresh },
+        });
+        if (!response.ok) return;
+
+        let total =
+          response.data.actions +
+          response.data.persons +
+          response.data.territories +
+          response.data.territoryObservations +
+          response.data.places +
+          response.data.comments +
+          response.data.passages +
+          response.data.reports +
+          response.data.relsPersonPlace;
+
+        if (total) {
+          setRefreshTrigger({
+            status: true,
+            options: { showFullScreen: false, initialLoad: false },
+          });
+        }
+      }, 2 * 60 * 1000);
+    }
+  }, [lastRefresh, organisationId, API, setRefreshTrigger]);
 
   useEffect(() => {
     setPicture([picture1, picture3, picture2][randomIntFromInterval(0, 2)]);

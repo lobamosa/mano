@@ -1,6 +1,6 @@
 {
   "name": "dashboard",
-  "version": "1.94.1",
+  "version": "1.98.0",
   "private": true,
   "dependencies": {
     "@babel/runtime": "^7.14.5",
@@ -21,6 +21,7 @@
     "formik": "^2.2.9",
     "libsodium": "^0.7.9",
     "libsodium-wrappers": "^0.7.9",
+    "localforage": "^1.10.0",
     "page-lifecycle": "^0.1.2",
     "react": "^17.0.2",
     "react-datepicker": "^4.0.0",

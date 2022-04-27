@@ -1,3 +1,89 @@
+# [1.98.0](https://github.com/SocialGouv/mano/compare/v1.97.0...v1.98.0) (2022-04-26)
+
+
+### Features
+
+* cache in dashboard ([#623](https://github.com/SocialGouv/mano/issues/623)) ([4c25165](https://github.com/SocialGouv/mano/commit/4c2516553e979b66902e1a4cbc080e66ee595a44))
+
+# [1.97.0](https://github.com/SocialGouv/mano/compare/v1.96.1...v1.97.0) (2022-04-26)
+
+
+### Features
+
+* **dashboard,app:** auto refresh ([#648](https://github.com/SocialGouv/mano/issues/648)) ([8403603](https://github.com/SocialGouv/mano/commit/8403603ee197c4a74a375e02f0622cde6fb2aed8))
+
+## [1.96.1](https://github.com/SocialGouv/mano/compare/v1.96.0...v1.96.1) (2022-04-26)
+
+
+### Bug Fixes
+
+* **api:** action instead of data ([fda5a92](https://github.com/SocialGouv/mano/commit/fda5a92d61db880787918736bf65069858f8a3ab))
+
+# [1.96.0](https://github.com/SocialGouv/mano/compare/v1.95.0...v1.96.0) (2022-04-26)
+
+
+### Features
+
+* **dashboard:** stats for passages with genders ([#633](https://github.com/SocialGouv/mano/issues/633)) ([9214639](https://github.com/SocialGouv/mano/commit/92146393665d17f6a119aa354bb7b98a47e645dc))
+
+# [1.95.0](https://github.com/SocialGouv/mano/compare/v1.94.8...v1.95.0) (2022-04-26)
+
+
+### Features
+
+* soft delete ([#642](https://github.com/SocialGouv/mano/issues/642)) ([2998209](https://github.com/SocialGouv/mano/commit/2998209615d06be9c2bcf5f08b4853caead81108))
+
+## [1.94.8](https://github.com/SocialGouv/mano/compare/v1.94.7...v1.94.8) (2022-04-25)
+
+
+### Bug Fixes
+
+* **dashboard:** show todo first ([#645](https://github.com/SocialGouv/mano/issues/645)) ([de590d8](https://github.com/SocialGouv/mano/commit/de590d89057b026763f50b41bbe8590798cad2ce))
+* **website:** images ([#646](https://github.com/SocialGouv/mano/issues/646)) ([c54baf3](https://github.com/SocialGouv/mano/commit/c54baf310b56fb36065d3d018b43cf219bb535f7))
+
+## [1.94.7](https://github.com/SocialGouv/mano/compare/v1.94.6...v1.94.7) (2022-04-25)
+
+
+### Bug Fixes
+
+* **app,website:** mano download url ([#621](https://github.com/SocialGouv/mano/issues/621)) ([86f9a44](https://github.com/SocialGouv/mano/commit/86f9a44a5796732c98d94d0869282eda354dfd1f))
+
+## [1.94.6](https://github.com/SocialGouv/mano/compare/v1.94.5...v1.94.6) (2022-04-25)
+
+
+### Bug Fixes
+
+* **dashboard:** can change team while whatching dashboard; ([10b2deb](https://github.com/SocialGouv/mano/commit/10b2debd715ac35d5eb3c6079589f3d470df0a04))
+* **dashboard:** can toggle alertness checkbox ([083aeb8](https://github.com/SocialGouv/mano/commit/083aeb8128d2622e92b840667c8e86f2f9b36185))
+
+## [1.94.5](https://github.com/SocialGouv/mano/compare/v1.94.4...v1.94.5) (2022-04-22)
+
+
+### Bug Fixes
+
+* **dashboard:** show date instead of createdAt in reports ([#634](https://github.com/SocialGouv/mano/issues/634)) ([602f246](https://github.com/SocialGouv/mano/commit/602f24689fa92ada03f5ada796bac0e7a1101576))
+
+## [1.94.4](https://github.com/SocialGouv/mano/compare/v1.94.3...v1.94.4) (2022-04-22)
+
+
+### Bug Fixes
+
+* **app,dashboard:** rename Dossier in Informations ([#632](https://github.com/SocialGouv/mano/issues/632)) ([adaacfc](https://github.com/SocialGouv/mano/commit/adaacfc8a5349b809a3c722b15a6730be03fec01))
+
+## [1.94.3](https://github.com/SocialGouv/mano/compare/v1.94.2...v1.94.3) (2022-04-22)
+
+
+### Bug Fixes
+
+* relaunch the deployment ([d6f804e](https://github.com/SocialGouv/mano/commit/d6f804ee12b6da39dd828d717b72bbfee0f3ce7b))
+
+## [1.94.2](https://github.com/SocialGouv/mano/compare/v1.94.1...v1.94.2) (2022-04-21)
+
+
+### Bug Fixes
+
+* **security:** add sanitizer, sanitize name and email before returning ([#577](https://github.com/SocialGouv/mano/issues/577)) ([31027e5](https://github.com/SocialGouv/mano/commit/31027e5a749a83877a28bb50c0712fa5d3b3a60c))
+
 ## [1.94.1](https://github.com/SocialGouv/mano/compare/v1.94.0...v1.94.1) (2022-04-14)
 
 

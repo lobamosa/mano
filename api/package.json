@@ -1,6 +1,6 @@
 {
   "name": "api_mano",
-  "version": "1.94.1",
+  "version": "1.98.0",
   "mobileAppVersion": "2.18.1",
   "description": "",
   "main": "index.js",
@@ -32,6 +32,7 @@
     "password-validator": "^5.1.0",
     "pg": "^8.5.1",
     "pg-hstore": "^2.3.3",
+    "sanitize-html": "^2.7.0",
     "sequelize": "^6.3.5",
     "zod": "^3.13.4"
   },

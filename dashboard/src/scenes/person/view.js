@@ -33,7 +33,7 @@ import {
   preparePersonForEncryption,
   commentForUpdatePerson,
 } from '../../recoil/persons';
-import { actionsState, mappedIdsToLabels } from '../../recoil/actions';
+import { actionsState, mappedIdsToLabels, TODO } from '../../recoil/actions';
 import UserName from '../../components/UserName';
 import SelectCustom from '../../components/SelectCustom';
 import SelectAsInput from '../../components/SelectAsInput';
@@ -303,7 +303,13 @@ const Summary = ({ person }) => {
                     <Label />
                     <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 20, width: '80%' }}>
                       <label htmlFor="person-alertness-checkbox">Personne très vulnérable, ou ayant besoin d'une attention particulière</label>
-                      <Input id="person-alertness-checkbox" type="checkbox" name="alertness" checked={values.alertness} onChange={handleChange} />
+                      <Input
+                        id="person-alertness-checkbox"
+                        type="checkbox"
+                        name="alertness"
+                        checked={values.alertness}
+                        onChange={() => handleChange({ target: { value: !values.alertness, name: 'alertness' } })}
+                      />
                     </div>
                   </FormGroup>
                 </Col>
@@ -321,7 +327,7 @@ const Summary = ({ person }) => {
                 </Col>
               </Row>
               <hr />
-              <Title>Dossier social</Title>
+              <Title>Informations sociales</Title>
               <Row>
                 <Col md={4}>
                   <Label htmlFor="person-select-personalSituation">Situation personnelle</Label>
@@ -411,7 +417,7 @@ const Summary = ({ person }) => {
               </Row>
 
               <hr />
-              <Title>Dossier médical</Title>
+              <Title>Informations médicales</Title>
               <Row>
                 <Col md={4}>
                   <Label htmlFor="person-select-healthInsurance">Couverture médicale</Label>
@@ -458,7 +464,7 @@ const Actions = ({ person, onUpdateResults }) => {
   const history = useHistory();
   const organisation = useRecoilValue(organisationState);
   const [filterCategories, setFilterCategories] = useState([]);
-  const [filterStatus, setFilterStatus] = useState([]);
+  const [filterStatus, setFilterStatus] = useState([TODO]);
 
   const catsSelect = ['-- Aucune --', ...(organisation.categories || [])];
 
@@ -516,11 +522,10 @@ const Actions = ({ person, onUpdateResults }) => {
               getOptionValue={(s) => s._id}
               getOptionLabel={(s) => s.name}
               name="status"
-              onChange={(s) => {
-                setFilterStatus(s.map((s) => s._id));
-              }}
+              onChange={(s) => setFilterStatus(s.map((s) => s._id))}
               isClearable
               isMulti
+              value={mappedIdsToLabels.filter((s) => filterStatus.includes(s._id))}
             />
           </Col>
         </Row>
